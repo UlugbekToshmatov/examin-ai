@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/V1.0-create_users_table.sql
+  - include:
+      file: db/changelog/V2.0-insert_sample_users.sql
+  - include:
+      file: db/changelog/V3.0-users_updated_at_nullable.sql
+  - include:
+      file: db/changelog/V3.1-add_deleted_at_column_to_users.sql
