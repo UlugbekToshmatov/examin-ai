@@ -1,4 +1,4 @@
-package com.vention.examiai.notificationservice;
+package com.vention.examinai.notificationservice;
 
 import config.filter.TransactionIdFilter;
 import org.springframework.boot.SpringApplication;

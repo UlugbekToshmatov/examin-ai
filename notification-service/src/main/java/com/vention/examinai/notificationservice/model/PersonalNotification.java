@@ -1,4 +1,4 @@
-package com.vention.examiai.notificationservice.model;
+package com.vention.examinai.notificationservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
