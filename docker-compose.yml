@@ -21,8 +21,8 @@ services:
     image: postgres
     environment:
       POSTGRES_DB: notification-service
-      POSTGRES_USER: notification-service-user
-      POSTGRES_PASSWORD: myPass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root123
       PGDATA: /var/lib/postgresql/data
     volumes:
       - postgres:/var/lib/postgresql/data
@@ -36,6 +36,25 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: exam_keycloak
+    restart: always
+    env_file: .env
+    command: start-dev
+    ports:
+      - "8181:8080"
+    depends_on:
+      - postgres
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/examinai_db
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+
 
 volumes:
   rabbitmq-data:
