@@ -19,6 +19,8 @@
         <module>discovery-service</module>
         <module>config</module>
         <module>common</module>
+        <module>auth</module>
+        <module>notification-service</module>
     </modules>
 
 
