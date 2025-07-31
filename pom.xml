@@ -21,6 +21,7 @@
 		<module>core</module>
 		<module>discovery</module>
 		<module>auth</module>
+		<module>notification</module>
 	</modules>
 
 	<properties>

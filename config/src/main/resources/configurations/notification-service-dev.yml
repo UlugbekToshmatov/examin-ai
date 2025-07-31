@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: root123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    default-schema: public
+    liquibase-schema: public
+    drop-first: false
+    contexts: development
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8181/realms/examinai
+
+  rabbitmq:
+    host: localhost
+    port: 5671
+    username: admin
+    password: admin123
+    auth:
+      queue: auth_queue
+      exchange: auth_exchange
+      route: auth_route
+    admin:
+      queue: admin_queue
+      exchange: admin_exchange
+      route: admin_route
+
+server:
+  port: 8060

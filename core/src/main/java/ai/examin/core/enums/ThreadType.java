@@ -1,0 +1,8 @@
+package ai.examin.core.enums;
+
+public enum ThreadType {
+    EMAIL_CONFIRMATION_THREAD,
+    SUCCESSFUL_REGISTRATION_THREAD,
+    TASK_NOTIFICATION_THREAD,
+    ERROR_NOTIFICATION_THREAD
+}
