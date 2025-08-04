@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: db/changelog/V1.0-create_notification_tables.sql
+  - include:
+      file: db/changelog/V2.0-drop_unnecessary_tables.sql

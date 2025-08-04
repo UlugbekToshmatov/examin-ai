@@ -1,0 +1,119 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/notification_service_db
+    username: admin
+    password: admin123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    default-schema: public
+    liquibase-schema: public
+    drop-first: false
+    contexts: development
+
+  #  security:
+  #    oauth2:
+  #      resourceserver:
+  #        jwt:
+  #          issuer-uri: http://localhost:8181/realms/examinai
+
+  rabbitmq:
+    host: localhost
+    port: 5671
+    username: admin
+    password: admin123
+    auth:
+      id: auth_listener
+      queue: auth_queue
+      exchange: auth_exchange
+      route: auth_route
+    email:
+      id: email_listener
+      queue: email_queue
+      exchange: email_exchange
+      route: email_route
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your@gmail.com
+    password: "app password"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  port: 8060
+
+#spring:
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/examinai_db
+#    username: examinai
+#    password: examinai123
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: none
+#    database: postgresql
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
+#
+#  liquibase:
+#    enabled: true
+#    change-log: classpath:/db/changelog/db.changelog-master.yaml
+#    default-schema: public
+#    liquibase-schema: public
+#    drop-first: false
+#    contexts: development
+#
+##  security:
+##    oauth2:
+##      resourceserver:
+##        jwt:
+##          issuer-uri: http://localhost:8181/realms/examinai
+#
+#  rabbitmq:
+#    host: localhost
+#    port: 5671
+#    username: admin
+#    password: admin123
+#    auth:
+#      queue: auth_queue
+#      exchange: auth_exchange
+#      route: auth_route
+#    admin:
+#      queue: admin_queue
+#      exchange: admin_exchange
+#      route: admin_route
+#
+#  mail:
+#    host: smtp.gmail.com
+#    port: 587
+#    username: your-email@gmail.com
+#    password: your-app-specific-password
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          starttls:
+#            enable: true
+#
+#server:
+#  port: 8060
