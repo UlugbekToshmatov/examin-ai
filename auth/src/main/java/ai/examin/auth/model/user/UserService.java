@@ -1,5 +1,6 @@
 package ai.examin.auth.model.user;
 
+import ai.examin.auth.model.notification.NotificationService;
 import ai.examin.auth.model.user.dto.UserRequest;
 import ai.examin.auth.model.user.dto.UserResponse;
 import ai.examin.core.enums.ResponseStatus;
@@ -14,7 +15,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -22,16 +25,18 @@ import java.util.List;
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationService notificationService;
 
 
     public Long register(UserRequest request) {
         if (userRepository.existsByEmailAndStatusNot(request.email(), Status.DELETED))
             throw new ApiException(ResponseStatus.EMAIL_ALREADY_REGISTERED);
 
-        User user = UserMapper.fromRequest(request, passwordEncoder);
+        User user = UserMapper.toUser(request, passwordEncoder);
         userRepository.save(user);
 
         // TODO: send email with confirmation link to the provided email
+        notificationService.sendNotification(getConfirmationLink(user));
 
         return user.getId();
     }
@@ -62,5 +67,14 @@ public class UserService implements UserDetailsService {
         log.info("User response by email: {}", user);
 
         return user;
+    }
+
+    private Map<String, Object> getConfirmationLink(User user) {
+        HashMap<String, Object> notification = new HashMap<>();
+        notification.put("firstName", user.getFirstName());
+        notification.put("email", user.getEmail());
+        notification.put("confirmationLink", "https://google.com");
+
+        return notification;
     }
 }

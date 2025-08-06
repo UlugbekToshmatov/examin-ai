@@ -7,6 +7,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -16,12 +18,14 @@ public class EmailService {
     private String from;
 
 
-    public void sendEmail(String email) {
+    public void sendEmail(Map<String, Object> payload) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setFrom(from);
-        mailMessage.setTo(email);
-        mailMessage.setSubject("Email Verification");
-        mailMessage.setText("Please verify your email address.");
+        mailMessage.setTo(payload.get("email").toString());
+        mailMessage.setSubject("Email Confirmation");
+        mailMessage.setText("Hello," + payload.get("firstName").toString()
+            + "\n\nPlease confirm your email address."
+            + "\n\nLink: " + payload.get("confirmationLink").toString());
         mailSender.send(mailMessage);
         log.info("Sent email details: {}", mailMessage);
     }

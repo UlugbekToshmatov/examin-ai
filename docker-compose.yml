@@ -59,6 +59,17 @@ services:
       timeout: 5s
       retries: 5
 
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "example@mail.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin123"
+    ports:
+      - "8282:80"
+    networks:
+      - examin-ai-net
+
 volumes:
   rabbitmq-data:
   notification-postgres:

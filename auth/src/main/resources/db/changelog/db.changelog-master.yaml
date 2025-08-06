@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/V3.0-users_updated_at_nullable.sql
   - include:
       file: db/changelog/V3.1-add_deleted_at_column_to_users.sql
+  - include:
+      file: db/changelog/V4.0-drop-custom-types.sql

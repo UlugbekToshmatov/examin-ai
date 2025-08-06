@@ -28,5 +28,16 @@ spring:
         jwt:
           issuer-uri: http://localhost:8181/realms/examinai
 
+  rabbitmq:
+    host: localhost
+    port: 5671
+    username: admin
+    password: admin123
+    auth:
+      id: auth_listener
+      queue: auth_queue
+      exchange: auth_exchange
+      route: auth_route
+
 server:
   port: 8070

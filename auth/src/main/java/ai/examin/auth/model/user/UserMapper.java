@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserMapper {
 
-    public static User fromRequest(UserRequest userRequest, PasswordEncoder passwordEncoder) {
+    public static User toUser(UserRequest userRequest, PasswordEncoder passwordEncoder) {
         return User.builder()
             .firstName(userRequest.firstName())
             .lastName(userRequest.lastName())
@@ -38,5 +38,4 @@ public class UserMapper {
             .createdAt(user.getCreatedAt())
             .build();
     }
-
 }

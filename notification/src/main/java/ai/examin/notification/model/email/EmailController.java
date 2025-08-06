@@ -19,7 +19,7 @@ public class EmailController {
 
     @PostMapping("/send/{email}")
     public ResponseEntity<HttpResponse> sendEmail(@PathVariable String email) {
-        CompletableFuture.runAsync(() -> emailService.sendEmail(email));
+//        CompletableFuture.runAsync(() -> emailService.sendEmail(email));
         return ResponseEntity.ok(
             HttpResponse.builder().statusCode(200).description("Email sent successfully").build()
         );
