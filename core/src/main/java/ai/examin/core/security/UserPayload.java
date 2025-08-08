@@ -1,22 +1,23 @@
-package ai.examin.auth.model.user.dto;
+package ai.examin.core.security;
 
+import ai.examin.core.enums.Status;
 import ai.examin.core.enums.UserRole;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @Builder
 @ToString
-public class UserResponse {
+public class UserPayload {
     private Long id;
     private String firstName;
     private String lastName;
     private String email;
+    private String password;
     private UserRole role;
-    private LocalDateTime createdAt;
+    private Status status;
+    private String accessToken;
 }

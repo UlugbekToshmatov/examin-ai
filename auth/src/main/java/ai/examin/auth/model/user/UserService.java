@@ -1,22 +1,25 @@
 package ai.examin.auth.model.user;
 
 import ai.examin.auth.model.notification.NotificationService;
+import ai.examin.auth.model.token.Token;
+import ai.examin.auth.model.token.TokenRepository;
 import ai.examin.auth.model.user.dto.UserRequest;
 import ai.examin.auth.model.user.dto.UserResponse;
 import ai.examin.core.enums.ResponseStatus;
 import ai.examin.core.enums.Status;
+import ai.examin.core.enums.TokenType;
 import ai.examin.core.exception_handler.ApiException;
+import ai.examin.core.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -24,6 +27,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final NotificationService notificationService;
 
@@ -46,17 +50,22 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findByEmailAndStatus(username, Status.ACTIVE)
             .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
 
-        log.info("User details: {}", user);
+        String jwtToken = null;
+        Token token = tokenRepository.findByUser_IdAndTypeAndRevokedFalseAndExpiredFalse(user.getId(), TokenType.ACCESS_TOKEN)
+            .orElse(null);
 
-        return new org.springframework.security.core.userdetails.User(
-            user.getUsername(),
-            user.getPassword(),
-            true,
-            true,
-            true,
-            !user.getStatus().equals(Status.BLOCKED),
-            List.of(new SimpleGrantedAuthority(user.getRole().name()))
-        );
+        if (token != null) {
+            if (LocalDateTime.now().isAfter(token.getExpiresAt())) {
+                token.setExpired(true);
+                tokenRepository.save(token);
+            } else
+                jwtToken = token.getJwtToken();
+        }
+
+        UserPrincipal userPrincipal = new UserPrincipal(UserMapper.getUserPayload(user, jwtToken));
+
+        log.info("User principal details: {}", userPrincipal);
+        return userPrincipal;
     }
 
     public UserResponse getUserByEmail(String email) {
