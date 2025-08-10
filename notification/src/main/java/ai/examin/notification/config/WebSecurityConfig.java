@@ -2,6 +2,7 @@ package ai.examin.notification.config;
 
 import ai.examin.core.security.JwtAuthenticationFilter;
 import ai.examin.core.security.JwtProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final ObjectMapper objectMapper;
 
 
     @Bean
@@ -63,7 +65,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtProvider(), userDetailsService);
+        return new JwtAuthenticationFilter(jwtProvider(), userDetailsService, objectMapper);
     }
 
     @Bean

@@ -19,10 +19,10 @@ public class UserMapper {
         return User.builder()
             .firstName(userRequest.firstName())
             .lastName(userRequest.lastName())
-            .email(userRequest.email().toLowerCase())
+            .email(userRequest.email().trim().toLowerCase())
             .password(passwordEncoder.encode(userRequest.password()))
             .role(UserRole.INTERN)
-            .status(Status.ACTIVE)
+            .status(Status.PENDING_VERIFICATION)
             .createdAt(LocalDateTime.now())
             .build();
     }
@@ -33,8 +33,21 @@ public class UserMapper {
             .firstName(user.getFirstName())
             .lastName(user.getLastName())
             .email(user.getEmail())
+            .imageUrl(user.getImageUrl())
             .role(user.getRole())
             .createdAt(user.getCreatedAt())
+            .build();
+    }
+
+    public static UserPayload getUserPayload(User user) {
+        return UserPayload.builder()
+            .id(user.getId())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .email(user.getEmail())
+            .password(user.getPassword())
+            .role(user.getRole())
+            .status(user.getStatus())
             .build();
     }
 

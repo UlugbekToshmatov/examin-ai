@@ -23,9 +23,9 @@ public class EmailService {
         mailMessage.setFrom(from);
         mailMessage.setTo(payload.get("email").toString());
         mailMessage.setSubject("Email Confirmation");
-        mailMessage.setText("Hello," + payload.get("firstName").toString()
-            + "\n\nPlease confirm your email address."
-            + "\n\nLink: " + payload.get("confirmationLink").toString());
+        mailMessage.setText("Hello " + payload.get("firstName").toString() + payload.get("lastName").toString() + ","
+            + "\n\nPlease, confirm your email address by clicking the link below:\n" + payload.get("link").toString()
+            + "\n\nNote that the link expires in 10 minutes.\n\nBest regards,\nExamin Team");
         mailSender.send(mailMessage);
         log.info("Sent email details: {}", mailMessage);
     }

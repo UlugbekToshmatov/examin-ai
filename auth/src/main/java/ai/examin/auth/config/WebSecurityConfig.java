@@ -1,7 +1,10 @@
 package ai.examin.auth.config;
 
+import ai.examin.core.exception_handler.CustomAccessDeniedHandler;
+import ai.examin.core.exception_handler.CustomAuthenticationEntryPoint;
 import ai.examin.core.security.JwtAuthenticationFilter;
 import ai.examin.core.security.JwtProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,12 +31,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final ObjectMapper objectMapper;
+    private final JwtProvider jwtProvider;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private static final String[] PUBLIC_URLS = {
+        "/api/v1/auth/register/**", "/api/v1/auth/confirm/account/**", "/api/v1/auth/login/**",
+        "/api/v1/auth/refresh/token/**"
+    };
 
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(PUBLIC_URLS).permitAll()
                     .requestMatchers("/api/v1/user/email/**").hasRole("INTERN")
                     .requestMatchers("/api/v1/user/**").permitAll()
                 .anyRequest().authenticated()
@@ -46,6 +58,10 @@ public class WebSecurityConfig {
             )*/
             .sessionManagement(configurer ->
                 configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                .accessDeniedHandler(customAccessDeniedHandler)
             )
             .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
@@ -74,11 +90,6 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtProvider(), userDetailsService);
-    }
-
-    @Bean
-    public JwtProvider jwtProvider() {
-        return new JwtProvider();
+        return new JwtAuthenticationFilter(jwtProvider, userDetailsService, objectMapper);
     }
 }

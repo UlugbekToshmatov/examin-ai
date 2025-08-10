@@ -19,22 +19,6 @@ CREATE TABLE users
     CONSTRAINT chk_users_status CHECK (status IN ('ACTIVE', 'PENDING_VERIFICATION', 'BLOCKED', 'DELETED'))
 );
 
--- Create account verifications table
-DROP TABLE IF EXISTS account_verifications CASCADE;
-
-CREATE TABLE account_verifications
-(
-    id         BIGSERIAL    PRIMARY KEY,
-    user_id    BIGINT       NOT NULL,
-    url        VARCHAR(255) NOT NULL,
-    status     VARCHAR(20)  NOT NULL,
-    created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT unq_account_verifications_user_id_url UNIQUE (user_id, url),
-    CONSTRAINT chk_account_verifications_status CHECK (status IN ('ACTIVE', 'DELETED'))
-);
-
 -- Create tokens table
 DROP TABLE IF EXISTS tokens CASCADE;
 
@@ -42,7 +26,7 @@ CREATE TABLE tokens
 (
     id         BIGSERIAL     PRIMARY KEY,
     jwt_token  VARCHAR(1024) NOT NULL UNIQUE,
-    type       VARCHAR(15)   NOT NULL CHECK (type IN ('ACCESS_TOKEN', 'REFRESH_TOKEN')),
+    type       VARCHAR(50)   NOT NULL CHECK (type IN ('ACCESS_TOKEN', 'REFRESH_TOKEN', 'ACCOUNT_VERIFICATION_TOKEN', 'RESET_PASSWORD_TOKEN')),
     issued_at  TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP     NOT NULL,
     revoked    BOOLEAN       DEFAULT FALSE,

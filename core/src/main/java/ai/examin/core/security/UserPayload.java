@@ -20,4 +20,5 @@ public class UserPayload {
     private UserRole role;
     private Status status;
     private String accessToken;
+    private String refreshToken;
 }

@@ -19,9 +19,9 @@ public class NotificationService {
     private String route;
 
 
-    public void sendNotification(Map<String, Object> notification) {
+    public void send(Map<String, Object> payload) {
         rabbitTemplate.convertAndSend(
-            exchange, route, notification
+            exchange, route, payload
         );
     }
 }

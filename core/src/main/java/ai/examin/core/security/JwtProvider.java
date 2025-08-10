@@ -1,6 +1,7 @@
 package ai.examin.core.security;
 
 import ai.examin.core.enums.ResponseStatus;
+import ai.examin.core.enums.TokenType;
 import ai.examin.core.exception_handler.ApiException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -8,6 +9,7 @@ import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.WeakKeyException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -17,19 +19,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static ai.examin.core.security.JwtProviderParams.*;
+
+@Slf4j
 @Service
 public class JwtProvider {
-    private static final String SECRET_KEY = "3C63CB44CD9BAD71AEF3B91EFC163WWLKFGPO25MTO36IOY232O3KRM23ROFI";
-    private static final long ACCESS_TOKEN_EXPIRATION = 1_800_000;      // 1 800 000 millis = 30 minutes
-    private static final long REFRESH_TOKEN_EXPIRATION = 432_000_000;   // 432 000 000 millis = 5 days
 
-
-    public String generateAccessToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, ACCESS_TOKEN_EXPIRATION);
-    }
-
-    public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, REFRESH_TOKEN_EXPIRATION);
+    public String generateToken(UserDetails userDetails, TokenType tokenType) {
+        return switch (tokenType) {
+            case ACCESS_TOKEN -> buildToken(new HashMap<>(), userDetails, ACCESS_TOKEN_EXPIRATION);
+            case REFRESH_TOKEN -> buildToken(new HashMap<>(), userDetails, REFRESH_TOKEN_EXPIRATION);
+            case ACCOUNT_VERIFICATION_TOKEN ->
+                buildToken(new HashMap<>(), userDetails, ACCOUNT_VERIFICATION_TOKEN_EXPIRATION);
+            case PASSWORD_RESET_TOKEN -> buildToken(new HashMap<>(), userDetails, RESET_PASSWORD_TOKEN_EXPIRATION);
+        };
     }
 
     private String buildToken(
@@ -70,8 +73,12 @@ public class JwtProvider {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException |
-                 IllegalArgumentException e) {
+        } catch (ExpiredJwtException e) {
+            log.error(e.getMessage());
+            throw new ApiException(ResponseStatus.TOKEN_EXPIRED);
+        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException |
+            IllegalArgumentException e) {
+            log.error(e.getMessage());
             throw new ApiException(ResponseStatus.INVALID_TOKEN);
         }
     }
@@ -81,6 +88,7 @@ public class JwtProvider {
             byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
             return Keys.hmacShaKeyFor(keyBytes);
         } catch (DecodingException | WeakKeyException e) {
+            log.error(e.getMessage());
             throw new ApiException(ResponseStatus.TOKEN_PROCESSING_ERROR);
         }
     }
