@@ -1,3 +1,6 @@
+server:
+  port: 8060
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/notification_service_db
@@ -47,8 +50,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: utoshmatovuz@gmail.com
-    password: "szwn grcu oewj ngga"
+    username: your@gmail.com
+    password: "app password"
     properties:
       mail:
         smtp:
@@ -56,5 +59,9 @@ spring:
           starttls:
             enable: true
 
-server:
-  port: 8060
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000

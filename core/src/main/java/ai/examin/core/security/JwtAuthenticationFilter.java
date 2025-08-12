@@ -71,9 +71,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Since authentication is required for all endpoints, throwing
                 // exception instead of doing filterChain.doFilter(request, response);
                 log.error("Subject is missing in JWT token: {}", jwt);
+                SecurityContextHolder.clearContext();
                 throw new ApiException(ResponseStatus.INVALID_TOKEN);
             }
         } catch (ApiException e) {
+            SecurityContextHolder.clearContext();
             AuthExceptionHandler.handleAuthFailure(response, e, objectMapper);
         }
     }
@@ -89,7 +91,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String getToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION);
         if (bearerToken == null)
-            throw new ApiException(ResponseStatus.TOKEN_NOT_FOUND);
+            throw new ApiException(ResponseStatus.TOKEN_REQUIRED);
 
         if (!bearerToken.startsWith(TOKEN_PREFIX))
             throw new ApiException(ResponseStatus.TOKEN_MUST_START_WITH_BEARER);

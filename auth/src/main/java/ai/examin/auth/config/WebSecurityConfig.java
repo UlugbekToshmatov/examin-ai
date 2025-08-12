@@ -1,5 +1,6 @@
 package ai.examin.auth.config;
 
+import ai.examin.core.enums.UserRole;
 import ai.examin.core.exception_handler.CustomAccessDeniedHandler;
 import ai.examin.core.exception_handler.CustomAuthenticationEntryPoint;
 import ai.examin.core.security.JwtAuthenticationFilter;
@@ -43,10 +44,12 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        http
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PUBLIC_URLS).permitAll()
-                    .requestMatchers("/api/v1/user/email/**").hasRole("INTERN")
+                    .requestMatchers("/api/v1/user/email/**").hasRole(UserRole.INTERN.name())
                     .requestMatchers("/api/v1/user/**").permitAll()
                 .anyRequest().authenticated()
             )
@@ -87,6 +90,7 @@ public class WebSecurityConfig {
         jwtConverter.setJwtGrantedAuthoritiesConverter(rolesConverter);
         return jwtConverter;
     }
+
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {

@@ -3,9 +3,11 @@ package ai.examin.auth.model.user;
 import ai.examin.auth.model.user.dto.UserResponse;
 import ai.examin.core.base_classes.HttpResponse;
 import ai.examin.core.enums.ResponseStatus;
+import ai.examin.core.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,5 +34,11 @@ public class UserController {
                 .data(Map.of("user", user))
                 .build()
         );
+    }
+
+    @GetMapping("/internal/email/{email}")
+    public HttpEntity<UserPrincipal> getUserByEmailInternal(@PathVariable String email) {
+        UserDetails userDetails = userService.loadUserByUsername(email);
+        return ResponseEntity.ok((UserPrincipal) userDetails);
     }
 }

@@ -1,3 +1,6 @@
+server:
+  port: 8060
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
@@ -56,5 +59,9 @@ spring:
           starttls:
             enable: true
 
-server:
-  port: 8060
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000

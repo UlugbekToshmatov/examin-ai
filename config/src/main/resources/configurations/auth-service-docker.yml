@@ -1,3 +1,6 @@
+server:
+  port: 8070
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/auth_service_db
@@ -38,6 +41,3 @@ spring:
       queue: auth_queue
       exchange: auth_exchange
       route: auth_route
-
-server:
-  port: 8070

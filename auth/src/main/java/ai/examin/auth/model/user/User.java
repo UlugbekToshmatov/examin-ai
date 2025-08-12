@@ -41,8 +41,8 @@ public class User {
     @Column(name = "status", nullable = false)
     private Status status;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "image_url", columnDefinition = "VARCHAR(255) DEFAULT 'https://cdn-icons-png.flaticon.com/512/149/149071.png'")
+    private String imageUrl = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt = LocalDateTime.now();

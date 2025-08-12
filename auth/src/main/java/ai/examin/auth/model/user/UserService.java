@@ -174,7 +174,7 @@ public class UserService implements UserDetailsService {
         payload.put("firstName", user.getFirstName());
         payload.put("lastName", user.getLastName());
         payload.put("email", user.getEmail());
-        payload.put("link", "http://localhost:8070/api/v1/user/confirm/account?token=" + jwtToken);
+        payload.put("link", "http://localhost:8070/api/v1/auth/confirm/account?token=" + jwtToken);
 
         return payload;
     }

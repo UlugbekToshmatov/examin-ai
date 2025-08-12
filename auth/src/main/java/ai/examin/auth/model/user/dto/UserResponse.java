@@ -1,6 +1,7 @@
 package ai.examin.auth.model.user.dto;
 
 import ai.examin.core.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,5 +20,6 @@ public class UserResponse {
     private String email;
     private String imageUrl;
     private UserRole role;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 }
