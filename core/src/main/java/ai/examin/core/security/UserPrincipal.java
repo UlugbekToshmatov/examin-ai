@@ -21,7 +21,7 @@ public class UserPrincipal implements UserDetails {
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.userPayload.getRole().name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.userPayload.getRole().name()));
     }
 
     @Override

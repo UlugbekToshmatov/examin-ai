@@ -15,7 +15,7 @@ CREATE TABLE users
     updated_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     deleted_at    TIMESTAMP,
     CONSTRAINT unq_users_email UNIQUE (email),
-    CONSTRAINT chk_users_role CHECK (role IN ('SUPERVISOR', 'EXPERT', 'MENTOR', 'INTERN')),
+    CONSTRAINT chk_users_role CHECK (role IN ('SUPERVISOR', 'EXPERT', 'MENTOR', 'INTERN', 'ADMIN')),
     CONSTRAINT chk_users_status CHECK (status IN ('ACTIVE', 'PENDING_VERIFICATION', 'BLOCKED', 'DELETED'))
 );
 

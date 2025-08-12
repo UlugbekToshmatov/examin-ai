@@ -34,8 +34,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper;
     private static final String TOKEN_PREFIX = "Bearer ";
     private static final String[] PUBLIC_ROUTES = {
-        "/api/v1/user/login", "/api/v1/user/register", "/api/v1/user/resetpassword",
-        "/api/v1/user/refresh/token"
+        "/api/v1/auth/register", "/api/v1/auth/confirm/account", "/api/v1/auth/login", "/api/v1/auth/resetpassword",
+        "/api/v1/auth/refresh/token"
     };
     private static final String HTTP_OPTIONS_METHOD = "OPTIONS";
 

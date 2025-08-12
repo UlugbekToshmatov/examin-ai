@@ -2,7 +2,6 @@ package ai.examin.auth.model.user;
 
 import ai.examin.auth.model.user.dto.LoginRequest;
 import ai.examin.auth.model.user.dto.UserRequest;
-import ai.examin.auth.model.user.dto.UserResponse;
 import ai.examin.core.base_classes.HttpResponse;
 import ai.examin.core.enums.ResponseStatus;
 import jakarta.validation.Valid;
@@ -11,8 +10,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")

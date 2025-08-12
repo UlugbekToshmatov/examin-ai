@@ -1,6 +1,5 @@
 package ai.examin.notification.config;
 
-import ai.examin.core.enums.UserRole;
 import ai.examin.core.exception_handler.CustomAccessDeniedHandler;
 import ai.examin.core.exception_handler.CustomAuthenticationEntryPoint;
 import ai.examin.core.security.JwtAuthenticationFilter;
@@ -20,8 +19,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-//import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -46,7 +43,7 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(
                 auth -> auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .requestMatchers("/api/v1/notification-threads/**").hasRole(UserRole.ADMIN.name())
+                    .requestMatchers("/api/v1/notification-threads/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             )
             /*.oauth2ResourceServer(
