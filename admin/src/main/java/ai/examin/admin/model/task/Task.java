@@ -1,0 +1,52 @@
+package ai.examin.admin.model.task;
+
+import ai.examin.admin.model.program.Program;
+import ai.examin.core.enums.TaskStatus;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@Builder
+@Getter
+@Setter
+@Table(name = "tasks")
+@Entity
+public class Task {
+    @Id
+    @SequenceGenerator(name = "tasks_id_seq", sequenceName = "tasks_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tasks_id_seq")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "program_id", nullable = false, updatable = false)
+    private Program program;
+
+    @Column(name = "mentor_id", nullable = false)
+    private Long mentorId;
+
+    @Column(name = "intern_id", nullable = false)
+    private Long internId;
+
+    @Column(name = "title", nullable = false)
+    private String title;
+
+    @Column(name = "github_link", nullable = false)
+    private String githubLink;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private TaskStatus status;
+
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at", updatable = false)
+    private LocalDateTime deletedAt;
+}

@@ -22,7 +22,8 @@
 		<module>discovery</module>
 		<module>auth</module>
 		<module>notification</module>
-	</modules>
+        <module>admin</module>
+    </modules>
 
 	<properties>
 		<java.version>17</java.version>

@@ -59,6 +59,30 @@ services:
       timeout: 5s
       retries: 5
 
+  admin-postgres:
+    container_name: admin-postgres
+    image: postgres
+    environment:
+      POSTGRES_DB: admin_service_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - admin-postgres:/var/lib/postgresql/data
+    ports:
+      - "5434:5434"
+    expose:
+      - 5434
+    command: -p 5434
+    networks:
+      - examin-ai-net
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d admin_service_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
@@ -74,6 +98,7 @@ volumes:
   rabbitmq-data:
   notification-postgres:
   auth-postgres:
+  admin-postgres:
 
 networks:
   examin-ai-net:
