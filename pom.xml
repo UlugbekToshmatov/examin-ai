@@ -23,6 +23,7 @@
 		<module>auth</module>
 		<module>notification</module>
         <module>admin</module>
+        <module>gateway</module>
     </modules>
 
 	<properties>

@@ -21,6 +21,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_seq")
     private Long id;
 
+    @Column(name = "external_id", nullable = false, unique = true)
+    private String externalId;
+
     @Column(name = "first_name", nullable = false)
     private String firstName;
 

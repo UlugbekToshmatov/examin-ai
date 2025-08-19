@@ -1,0 +1,57 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      default-filters:
+        - TokenRelay   # passes the access token downstream
+      routes:
+        # --------------------------
+        # Auth Service
+        # --------------------------
+        - id: auth-service
+          uri: http://localhost:8070    # adjust port/container name if running in Docker
+          predicates:
+            - Path=/api/v1/auth/**, /api/v1/user/**
+          filters:
+            - RemoveRequestHeader=Cookie
+            - AddRequestHeader=Authorization, Bearer #{token}
+
+        # --------------------------
+        # Notification Service
+        # --------------------------
+        - id: notification-service
+          uri: http://localhost:8060
+          predicates:
+            - Path=/api/v1/notification-threads/**
+          filters:
+            - RemoveRequestHeader=Cookie
+
+        # --------------------------
+        # Admin Service
+        # --------------------------
+        - id: admin-service
+          uri: http://localhost:8050
+          predicates:
+            - Path=/api/v1/course/**, /api/v1/program/**, /api/v1/task/**
+          filters:
+            - RemoveRequestHeader=Cookie
+
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: examinai-gateway
+            client-name: Keycloak
+            provider: keycloak
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid, profile, email
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8181/realms/examinai
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8181/realms/examinai

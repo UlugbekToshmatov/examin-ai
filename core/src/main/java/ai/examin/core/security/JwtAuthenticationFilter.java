@@ -26,7 +26,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 
 @Slf4j
-@Component
+//@Component    // INFO: commented this line because we don't need to register this filter
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;

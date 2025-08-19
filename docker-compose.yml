@@ -93,6 +93,29 @@ services:
       - "8282:80"
     networks:
       - examin-ai-net
+  
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    command: start-dev
+    restart: unless-stopped
+    environment:
+      KC_DB: postgres
+      # KC_DB_URL_HOST: auth-postgres
+      # KC_DB_PORT: 5433
+      # KC_DB_DATABASE: auth_service_db
+      KC_DB_URL: jdbc:postgresql://auth-postgres:5433/auth_service_db
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: admin123
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+    ports:
+      - "8181:8080"
+    depends_on:
+      - auth-postgres
+    networks:
+      - examin-ai-net
+
 
 volumes:
   rabbitmq-data:
