@@ -1,4 +1,4 @@
-package ai.examin.auth.config;
+package ai.examin.auth.security_config;
 
 import ai.examin.core.exception_handler.CustomAccessDeniedHandler;
 import ai.examin.core.exception_handler.CustomAuthenticationEntryPoint;
@@ -26,8 +26,7 @@ public class WebSecurityConfig {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private static final String[] PUBLIC_URLS = {
-        "/api/v1/auth/register/**", "/api/v1/auth/confirm/account/**", "/api/v1/auth/login/**",
-        "/api/v1/auth/refresh/token/**"
+        "/api/v1/auth/register/**", "/api/v1/auth/reset-password/**"
     };
 
 

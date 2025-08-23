@@ -1,4 +1,4 @@
-package ai.examin.auth.config;
+package ai.examin.auth.security_config;
 
 import ai.examin.core.security.JwtProvider;
 import org.springframework.context.annotation.Bean;

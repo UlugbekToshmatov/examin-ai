@@ -4,38 +4,44 @@ server:
 spring:
   cloud:
     gateway:
-      default-filters:
-        - TokenRelay   # passes the access token downstream
       routes:
-        # --------------------------
-        # Auth Service
-        # --------------------------
         - id: auth-service
-          uri: http://localhost:8070    # adjust port/container name if running in Docker
+          uri: lb://auth-service
           predicates:
-            - Path=/api/v1/auth/**, /api/v1/user/**
+            - Path=/api/v1/auth/**
           filters:
             - RemoveRequestHeader=Cookie
-            - AddRequestHeader=Authorization, Bearer #{token}
 
-        # --------------------------
-        # Notification Service
-        # --------------------------
+        - id: user-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/user/**
+          filters:
+            - RemoveRequestHeader=Cookie
+            - AddRequestHeader=Authorization, Bearer
+
         - id: notification-service
-          uri: http://localhost:8060
+          uri: lb://notification-service
           predicates:
             - Path=/api/v1/notification-threads/**
           filters:
             - RemoveRequestHeader=Cookie
+            - AddRequestHeader=Authorization, Bearer
 
-        # --------------------------
-        # Admin Service
-        # --------------------------
         - id: admin-service
-          uri: http://localhost:8050
+          uri: lb://admin-service
           predicates:
             - Path=/api/v1/course/**, /api/v1/program/**, /api/v1/task/**
           filters:
+            - RemoveRequestHeader=Cookie
+            - AddRequestHeader=Authorization, Bearer
+
+        - id: discovery-service
+          uri: http://localhost:8761
+          predicates:
+            - Path=/eureka/**
+          filters:
+            - SetPath=/
             - RemoveRequestHeader=Cookie
 
   security:
@@ -55,3 +61,8 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8181/realms/examinai
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web.server: DEBUG

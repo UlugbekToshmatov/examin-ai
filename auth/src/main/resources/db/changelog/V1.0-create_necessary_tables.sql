@@ -4,9 +4,11 @@ DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users
 (
     id            BIGSERIAL    PRIMARY KEY,
+    external_id   VARCHAR(255) NOT NULL UNIQUE,
+    username      VARCHAR(255) NOT NULL UNIQUE,
     first_name    VARCHAR(255) NOT NULL,
     last_name     VARCHAR(255) NOT NULL,
-    email         VARCHAR(255) NOT NULL,
+    email         VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role          VARCHAR(20)  NOT NULL,
     status        VARCHAR(20)  NOT NULL,
@@ -14,7 +16,6 @@ CREATE TABLE users
     created_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     deleted_at    TIMESTAMP,
-    CONSTRAINT unq_users_email UNIQUE (email),
     CONSTRAINT chk_users_role CHECK (role IN ('SUPERVISOR', 'EXPERT', 'MENTOR', 'INTERN', 'ADMIN')),
     CONSTRAINT chk_users_status CHECK (status IN ('ACTIVE', 'PENDING_VERIFICATION', 'BLOCKED', 'DELETED'))
 );

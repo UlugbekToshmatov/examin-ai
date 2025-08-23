@@ -1,4 +1,4 @@
-package ai.examin.auth.model.user;
+package ai.examin.auth.model.user.entity;
 
 import ai.examin.core.enums.Status;
 import ai.examin.core.enums.UserRole;
@@ -23,6 +23,9 @@ public class User {
 
     @Column(name = "external_id", nullable = false, unique = true)
     private String externalId;
+
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;

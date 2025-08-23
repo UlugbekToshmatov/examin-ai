@@ -1,7 +1,8 @@
-package ai.examin.auth.model.user;
+package ai.examin.auth.model.user.mapper;
 
 import ai.examin.auth.model.user.dto.UserRequest;
 import ai.examin.auth.model.user.dto.UserResponse;
+import ai.examin.auth.model.user.entity.User;
 import ai.examin.core.enums.Status;
 import ai.examin.core.enums.UserRole;
 import ai.examin.core.security.UserPayload;
@@ -16,20 +17,23 @@ import java.time.LocalDateTime;
 public class UserMapper {
 
     public static User toUser(UserRequest userRequest, PasswordEncoder passwordEncoder) {
-        return User.builder()
-            .firstName(userRequest.firstName())
-            .lastName(userRequest.lastName())
-            .email(userRequest.email().trim().toLowerCase())
-            .password(passwordEncoder.encode(userRequest.password()))
-            .role(UserRole.INTERN)
-            .status(Status.PENDING_VERIFICATION)
-            .createdAt(LocalDateTime.now())
-            .build();
+        User user = new User();
+        user.setExternalId("dummyValue");
+        user.setUsername(userRequest.username().trim().toLowerCase());
+        user.setFirstName(userRequest.firstName().trim());
+        user.setLastName(userRequest.lastName().trim());
+        user.setEmail(userRequest.email().trim().toLowerCase());
+        user.setPassword(passwordEncoder.encode(userRequest.password().trim()));
+        user.setRole(UserRole.INTERN);
+        user.setStatus(Status.PENDING_VERIFICATION);
+
+        return user;
     }
 
     public static UserResponse fromUser(User user) {
         return UserResponse.builder()
             .id(user.getId())
+            .username(user.getUsername())
             .firstName(user.getFirstName())
             .lastName(user.getLastName())
             .email(user.getEmail())

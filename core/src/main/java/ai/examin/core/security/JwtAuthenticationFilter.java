@@ -24,9 +24,10 @@ import java.util.Arrays;
 import static org.apache.logging.log4j.util.Strings.EMPTY;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
-
+// commented @Component because we don't need to register this filter now.
+// Otherwise, this filter will be used to validate tokens issued by Keycloak.
 @Slf4j
-//@Component    // INFO: commented this line because we don't need to register this filter
+//@Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
@@ -68,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
                 filterChain.doFilter(request, response);
             } else {
-                // Since authentication is required for all endpoints, throwing
+                // Since authentication is required for all endpoints, throw
                 // exception instead of doing filterChain.doFilter(request, response);
                 log.error("Subject is missing in JWT token: {}", jwt);
                 SecurityContextHolder.clearContext();

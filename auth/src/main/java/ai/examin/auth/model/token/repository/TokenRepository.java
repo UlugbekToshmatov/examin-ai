@@ -1,6 +1,7 @@
-package ai.examin.auth.model.token;
+package ai.examin.auth.model.token.repository;
 
-import ai.examin.auth.model.user.User;
+import ai.examin.auth.model.token.entity.Token;
+import ai.examin.auth.model.user.entity.User;
 import ai.examin.core.enums.TokenType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

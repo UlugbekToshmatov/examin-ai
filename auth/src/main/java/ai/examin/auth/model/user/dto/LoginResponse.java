@@ -1,7 +1,7 @@
 package ai.examin.auth.model.user.dto;
 
-import ai.examin.auth.model.user.User;
-import ai.examin.auth.model.user.UserMapper;
+import ai.examin.auth.model.user.entity.User;
+import ai.examin.auth.model.user.mapper.UserMapper;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

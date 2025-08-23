@@ -1,6 +1,7 @@
-package ai.examin.auth.model.user;
+package ai.examin.auth.model.user.controller;
 
 import ai.examin.auth.model.user.dto.UserResponse;
+import ai.examin.auth.model.user.service.UserService;
 import ai.examin.core.base_classes.HttpResponse;
 import ai.examin.core.enums.ResponseStatus;
 import ai.examin.core.security.UserPrincipal;

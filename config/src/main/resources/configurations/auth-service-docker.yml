@@ -29,7 +29,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8181/realms/examinai
+          issuer-uri: ${keycloak.server-url}/realms/${keycloak.realm}
 
   rabbitmq:
     host: localhost
@@ -41,3 +41,10 @@ spring:
       queue: auth_queue
       exchange: auth_exchange
       route: auth_route
+
+keycloak:
+  server-url: http://localhost:8181
+  realm: examinai
+  admin:
+    client-id: examinai-admin-api
+    client-secret: MCVgeMd5w2Sy9r1xr2tHikLoCOROpBS4

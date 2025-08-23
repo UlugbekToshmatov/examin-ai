@@ -1,6 +1,7 @@
-package ai.examin.auth.model.token;
+package ai.examin.auth.model.token.mapper;
 
-import ai.examin.auth.model.user.User;
+import ai.examin.auth.model.token.entity.Token;
+import ai.examin.auth.model.user.entity.User;
 import ai.examin.core.enums.TokenType;
 
 import java.time.Duration;

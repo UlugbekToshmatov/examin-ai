@@ -4,52 +4,45 @@ server:
 spring:
   cloud:
     gateway:
-      default-filters:
-        - TokenRelay   # passes the access token downstream, but only works when using oauth2Login() and session-based login
-                      # to pass the access token downstream, use the TokenRelayConfig class
-#      routes:
-#        # --------------------------
-#        # Auth Service
-#        # --------------------------
-#        - id: auth-service
-#          uri: http://localhost:8070    # adjust port/container name if running in Docker
-#          predicates:
-#            - Path=/api/v1/auth/**, /api/v1/user/**
-#          filters:
-#            - RemoveRequestHeader=Cookie
-#
-#        # --------------------------
-#        # Notification Service
-#        # --------------------------
-#        - id: notification-service
-#          uri: http://localhost:8060
-#          predicates:
-#            - Path=/api/v1/notification-threads/**
-#          filters:
-#            - RemoveRequestHeader=Cookie
-#
-#        # --------------------------
-#        # Admin Service
-#        # --------------------------
-#        - id: admin-service
-#          uri: http://localhost:8050
-#          predicates:
-#            - Path=/api/v1/course/**, /api/v1/program/**, /api/v1/task/**
-#          filters:
-#            - RemoveRequestHeader=Cookie
       routes:
         - id: auth-service
           uri: lb://auth-service
           predicates:
-            - Path=/api/v1/auth/**, /api/v1/user/**
+            - Path=/api/v1/auth/**
+          filters:
+            - RemoveRequestHeader=Cookie
+
+        - id: user-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/user/**
+          filters:
+            - RemoveRequestHeader=Cookie
+            - AddRequestHeader=Authorization, Bearer
+
         - id: notification-service
           uri: lb://notification-service
           predicates:
             - Path=/api/v1/notification-threads/**
+          filters:
+            - RemoveRequestHeader=Cookie
+            - AddRequestHeader=Authorization, Bearer
+
         - id: admin-service
           uri: lb://admin-service
           predicates:
             - Path=/api/v1/course/**, /api/v1/program/**, /api/v1/task/**
+          filters:
+            - RemoveRequestHeader=Cookie
+            - AddRequestHeader=Authorization, Bearer
+
+        - id: discovery-service
+          uri: http://localhost:8761
+          predicates:
+            - Path=/eureka/**
+          filters:
+            - SetPath=/
+            - RemoveRequestHeader=Cookie
 
   security:
     oauth2:
@@ -68,3 +61,8 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8181/realms/examinai
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web.server: DEBUG

@@ -1,6 +1,6 @@
-package ai.examin.auth.model.token;
+package ai.examin.auth.model.token.entity;
 
-import ai.examin.auth.model.user.User;
+import ai.examin.auth.model.user.entity.User;
 import ai.examin.core.enums.TokenType;
 import jakarta.persistence.*;
 import lombok.*;
