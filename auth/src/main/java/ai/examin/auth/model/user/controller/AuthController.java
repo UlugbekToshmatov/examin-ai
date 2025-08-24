@@ -1,17 +1,16 @@
 package ai.examin.auth.model.user.controller;
 
+import ai.examin.auth.model.user.dto.UpdatePasswordRequest;
 import ai.examin.auth.model.user.dto.UserRequest;
 import ai.examin.auth.model.user.service.AuthService;
 import ai.examin.core.base_classes.HttpResponse;
+import ai.examin.core.enums.ResponseStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -33,27 +32,29 @@ public class AuthController {
         );
     }
 
-//    @GetMapping("/confirm/account")
-//    public HttpEntity<HttpResponse> confirm(@RequestParam(value = "token") String jwtToken) {
-//        authService.confirmEmail(jwtToken);
-//
-//        return ResponseEntity.ok(
-//            HttpResponse.builder()
-//                .statusCode(ResponseStatus.OK.getStatusCode())
-//                .description(ResponseStatus.OK.getDescription())
-//                .data("You have successfully confirmed your email. You can now log in to your account.")
-//                .build()
-//        );
-//    }
-//
-//    @PostMapping("/login")
-//    public HttpEntity<HttpResponse> login(@RequestBody @Valid LoginRequest request) {
-//        return ResponseEntity.ok(
-//            HttpResponse.builder()
-//                .statusCode(HttpStatus.OK.value())
-//                .description(HttpStatus.OK.name())
-//                .data(authService.login(request))
-//                .build()
-//        );
-//    }
+    @GetMapping("/forgot-password")
+    public HttpEntity<HttpResponse> forgotPassword(@RequestParam(value = "email") String email) {
+        authService.forgotPassword(email);
+
+        return ResponseEntity.ok(
+            HttpResponse.builder()
+                .statusCode(ResponseStatus.OK.getStatusCode())
+                .description(ResponseStatus.OK.getDescription())
+                .data("A link has been sent to your email to reset your password.")
+                .build()
+        );
+    }
+
+    @PutMapping("/reset-password")
+    public HttpEntity<HttpResponse> updatePassword(@RequestBody @Valid UpdatePasswordRequest request) {
+        authService.resetPassword(request);
+
+        return ResponseEntity.ok(
+            HttpResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .description(HttpStatus.OK.name())
+                .data("Password has been reset successfully.")
+                .build()
+        );
+    }
 }

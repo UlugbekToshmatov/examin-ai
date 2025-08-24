@@ -11,6 +11,7 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RolesResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +19,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
+import static ai.examin.auth.model.keycloak.mapper.KeycloakMapper.getCredentialRepresentation;
 import static ai.examin.auth.model.keycloak.mapper.KeycloakMapper.getUserRepresentation;
 import static java.lang.Boolean.TRUE;
 
@@ -41,7 +44,7 @@ public class KeycloakService {
                     String userId = response.getLocation().getPath().substring(
                         response.getLocation().getPath().lastIndexOf('/') + 1
                     );
-                    verifyEmail(userId);
+                    CompletableFuture.runAsync(() -> verifyEmail(userId));
                     getUserResource(userId).roles().realmLevel().add(
                         Collections.singletonList(getRoleRepresentation(UserRole.INTERN.name()))
                     );
@@ -59,6 +62,28 @@ public class KeycloakService {
                 request.email(), request.username(), e.getMessage());
             throw e;
         }
+    }
+
+    public void forgotPassword(String userId) {
+        String UPDATE_PASSWORD = "UPDATE_PASSWORD";
+        UserResource user = getUserById(userId);
+        CompletableFuture.runAsync(() -> user.executeActionsEmail(Collections.singletonList(UPDATE_PASSWORD)));
+    }
+
+    public void resetPassword(String userId, String password) {
+        UserResource user = getUserById(userId);
+        CredentialRepresentation credentialRepresentation = getCredentialRepresentation(password);
+        user.resetPassword(credentialRepresentation);
+    }
+
+    private UserResource getUserById(String userId) {
+        UserResource user = getUserResource(userId);
+
+        if (user == null) {
+            log.error("User with id: '{}' not found in Keycloak", userId);
+            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
+        }
+        return user;
     }
 
     private UserRepresentation getUserByUsername(String username) {

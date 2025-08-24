@@ -23,7 +23,7 @@ public class KeycloakMapper {
         return user;
     }
 
-    private static CredentialRepresentation getCredentialRepresentation(String password) {
+    public static CredentialRepresentation getCredentialRepresentation(String password) {
         CredentialRepresentation credentials = new CredentialRepresentation();
         credentials.setType(CredentialRepresentation.PASSWORD);
         credentials.setValue(password.trim());

@@ -19,14 +19,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
-//    private final UserDetailsService userDetailsService;
-//    private final PasswordEncoder passwordEncoder;
-//    private final ObjectMapper objectMapper;
-//    private final JwtProvider jwtProvider;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private static final String[] PUBLIC_URLS = {
-        "/api/v1/auth/register/**", "/api/v1/auth/reset-password/**"
+        "/api/v1/auth/register/**", "/api/v1/auth/forgot-password/**"
     };
 
 
@@ -37,12 +33,9 @@ public class WebSecurityConfig {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PUBLIC_URLS).permitAll()
-//                .requestMatchers("/api/v1/user/email/**").permitAll()
                 .requestMatchers("/api/v1/user/email/**").hasRole("INTERN")
-                .requestMatchers("/api/v1/user/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .formLogin(Customizer.withDefaults())
             .oauth2ResourceServer(
                 oauth2 -> oauth2.jwt(
                     jwt -> jwt.jwtAuthenticationConverter(new KeycloakJwtAuthConverter())
@@ -54,35 +47,8 @@ public class WebSecurityConfig {
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(customAuthenticationEntryPoint)
                 .accessDeniedHandler(customAccessDeniedHandler)
-            )
-            /*.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)*/;
+            );
 
         return http.build();
     }
-
-
-//    @Bean
-//    public AuthenticationManager authenticationManager() {
-//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-//        authProvider.setPasswordEncoder(passwordEncoder);
-//        return new ProviderManager(authProvider);
-//    }
-//
-//
-//    @Bean
-//    JwtAuthenticationConverter jwtAuthenticationConverter() {
-//        JwtGrantedAuthoritiesConverter rolesConverter = new JwtGrantedAuthoritiesConverter();
-//        rolesConverter.setAuthoritiesClaimName("realm_access.roles");
-//        rolesConverter.setAuthorityPrefix("ROLE_");
-//
-//        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
-//        jwtConverter.setJwtGrantedAuthoritiesConverter(rolesConverter);
-//        return jwtConverter;
-//    }
-//
-//
-//    @Bean
-//    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-//        return new JwtAuthenticationFilter(jwtProvider, userDetailsService, objectMapper);
-//    }
 }

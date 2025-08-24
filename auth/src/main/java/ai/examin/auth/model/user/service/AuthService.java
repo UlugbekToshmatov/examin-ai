@@ -1,8 +1,7 @@
 package ai.examin.auth.model.user.service;
 
 import ai.examin.auth.model.keycloak.service.KeycloakService;
-import ai.examin.auth.model.notification.NotificationService;
-import ai.examin.auth.model.token.repository.TokenRepository;
+import ai.examin.auth.model.user.dto.UpdatePasswordRequest;
 import ai.examin.auth.model.user.dto.UserRequest;
 import ai.examin.auth.model.user.entity.User;
 import ai.examin.auth.model.user.mapper.UserMapper;
@@ -10,7 +9,7 @@ import ai.examin.auth.model.user.repository.UserRepository;
 import ai.examin.core.enums.ResponseStatus;
 import ai.examin.core.enums.Status;
 import ai.examin.core.exception_handler.ApiException;
-import ai.examin.core.security.JwtProvider;
+import ai.examin.core.utils.UserContextService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -18,16 +17,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
-    private final TokenRepository tokenRepository;
-    private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
-    private final JwtProvider jwtProvider;
     private final KeycloakService keycloakService;
+    private final UserContextService userContextService;
 
 
     @Transactional
@@ -50,6 +50,45 @@ public class AuthService {
             log.error("Failed to save externalId={} for user with email={}. Cause: {}",
                 registeredUser.getId(), registeredUser.getEmail(), e.getMessage());
         }
+    }
+
+    public void forgotPassword(String email) {
+        if (email.isEmpty())
+            throw new ApiException(ResponseStatus.EMAIL_REQUIRED);
+
+        User user = userRepository.findByEmailAndStatus(email.trim().toLowerCase(), Status.ACTIVE)
+            .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
+
+        keycloakService.forgotPassword(user.getExternalId());
+    }
+
+    @Transactional
+    public void resetPassword(UpdatePasswordRequest request) {
+        User user = userRepository.findByIdAndStatus(request.id(), Status.ACTIVE)
+            .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword()))
+            throw new ApiException(ResponseStatus.INCORRECT_PASSWORD);
+
+        if (!request.newPassword().equals(request.confirmPassword()))
+            throw new ApiException(ResponseStatus.PASSWORDS_DO_NOT_MATCH);
+
+        if (request.oldPassword().equals(request.newPassword()))
+            throw new ApiException(ResponseStatus.PROVIDE_NEW_PASSWORD);
+
+        Optional<String> currentUserExternalId = userContextService.getCurrentUserId();
+        if (currentUserExternalId.isEmpty()) {
+            log.error("User details are not present in the context for user with id: {}", user.getId());
+            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
+        }
+
+        if (!Objects.equals(user.getExternalId(), currentUserExternalId.get()))
+            throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+
+        keycloakService.resetPassword(user.getExternalId(), request.newPassword());
     }
 
 //    @Transactional

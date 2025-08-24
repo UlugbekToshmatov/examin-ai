@@ -23,10 +23,7 @@ public class RabbitListeners {
     )
     public void consumeAuthMessage(Map<String, Object> payload, Message message) {
         try {
-            log.info("Received auth notification message: {}\nPayload: {}",
-                   message,
-                   payload);
-            // Process the message here
+            log.info("Received auth notification message: {}\nPayload: {}", message, payload);
             emailService.sendEmail(payload);
         } catch (Exception e) {
             log.error("Error processing auth message: {}", e.getMessage(), e);
