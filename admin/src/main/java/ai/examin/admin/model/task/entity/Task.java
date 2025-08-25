@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@Builder
 @Getter
 @Setter
 @Table(name = "tasks", uniqueConstraints = @UniqueConstraint(columnNames = {"program_id", "title"}))
@@ -28,14 +27,8 @@ public class Task {
     @Column(name = "mentor_id", nullable = false)
     private Long mentorId;
 
-    @Column(name = "intern_id", nullable = false)
-    private Long internId;
-
-    @Column(name = "title", nullable = false)
-    private String title;
-
-    @Column(name = "github_link", nullable = false)
-    private String githubLink;
+    @Column(name = "definition", nullable = false)
+    private String definition;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

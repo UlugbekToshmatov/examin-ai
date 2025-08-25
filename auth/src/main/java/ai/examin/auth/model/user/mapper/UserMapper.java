@@ -7,6 +7,7 @@ import ai.examin.core.enums.Status;
 import ai.examin.core.enums.UserRole;
 import ai.examin.core.security.UserPayload;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserMapper {
 
-    public static User toUser(UserRequest userRequest, PasswordEncoder passwordEncoder) {
+    public static User toEntity(UserRequest userRequest, PasswordEncoder passwordEncoder) {
         User user = new User();
         user.setExternalId("dummyValue");
         user.setUsername(userRequest.username().trim().toLowerCase());
@@ -28,42 +29,25 @@ public class UserMapper {
         return user;
     }
 
-    public static UserResponse fromUser(User user) {
-        return UserResponse.builder()
-            .id(user.getId())
-            .externalId(user.getExternalId())
-            .username(user.getUsername())
-            .firstName(user.getFirstName())
-            .lastName(user.getLastName())
-            .email(user.getEmail())
-            .imageUrl(user.getImageUrl())
-            .role(user.getRole())
-            .createdAt(user.getCreatedAt())
-            .build();
+    public static UserResponse toResponse(User user) {
+        UserResponse userResponse = new UserResponse();
+        BeanUtils.copyProperties(user, userResponse);
+
+        return userResponse;
     }
 
     public static UserPayload getUserPayload(User user) {
-        return UserPayload.builder()
-            .id(user.getId())
-            .firstName(user.getFirstName())
-            .lastName(user.getLastName())
-            .email(user.getEmail())
-            .password(user.getPassword())
-            .role(user.getRole())
-            .status(user.getStatus())
-            .build();
+        UserPayload userPayload = new UserPayload();
+        BeanUtils.copyProperties(user, userPayload);
+
+        return userPayload;
     }
 
     public static UserPayload getUserPayload(User user, String jwtToken) {
-        return UserPayload.builder()
-            .id(user.getId())
-            .firstName(user.getFirstName())
-            .lastName(user.getLastName())
-            .email(user.getEmail())
-            .password(user.getPassword())
-            .role(user.getRole())
-            .status(user.getStatus())
-            .accessToken(jwtToken)
-            .build();
+        UserPayload userPayload = new UserPayload();
+        BeanUtils.copyProperties(user, userPayload);
+        userPayload.setAccessToken(jwtToken);
+
+        return userPayload;
     }
 }

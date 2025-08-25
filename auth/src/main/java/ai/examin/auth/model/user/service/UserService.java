@@ -55,7 +55,7 @@ public class UserService implements UserDetailsService {
 
     public UserResponse getUserByEmail(String email) {
         UserResponse user = userRepository.findByEmailAndStatus(email, Status.ACTIVE)
-            .map(UserMapper::fromUser)
+            .map(UserMapper::toResponse)
             .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
 
         log.info("User response by email: {}", user);
@@ -65,7 +65,7 @@ public class UserService implements UserDetailsService {
 
     public UserResponse getUserById(Long id) {
         UserResponse user = userRepository.findByIdAndStatus(id, Status.ACTIVE)
-            .map(UserMapper::fromUser)
+            .map(UserMapper::toResponse)
             .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
 
         log.info("User response by id: {}", user);
@@ -75,7 +75,7 @@ public class UserService implements UserDetailsService {
 
     public UserResponse getUserByExternalId(String externalId) {
         UserResponse user = userRepository.findByExternalIdAndStatus(externalId, Status.ACTIVE)
-            .map(UserMapper::fromUser)
+            .map(UserMapper::toResponse)
             .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
 
         log.info("User response by external id: {}", user);

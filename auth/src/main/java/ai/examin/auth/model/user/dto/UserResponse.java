@@ -2,17 +2,15 @@ package ai.examin.auth.model.user.dto;
 
 import ai.examin.core.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Builder
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserResponse {
     private Long id;
     private String externalId;

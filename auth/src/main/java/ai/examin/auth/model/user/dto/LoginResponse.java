@@ -16,7 +16,7 @@ public class LoginResponse {
 
 
     public LoginResponse(User user, String accessToken, String refreshToken) {
-        this.user = UserMapper.fromUser(user);
+        this.user = UserMapper.toResponse(user);
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }

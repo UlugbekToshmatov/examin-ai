@@ -38,7 +38,7 @@ public class AuthService {
         if (userRepository.existsByEmailAndStatusNot(request.email().trim().toLowerCase(), Status.DELETED))
             throw new ApiException(ResponseStatus.EMAIL_ALREADY_REGISTERED);
 
-        User user = UserMapper.toUser(request, passwordEncoder);
+        User user = UserMapper.toEntity(request, passwordEncoder);
         userRepository.save(user);
 
         UserRepresentation registeredUser = keycloakService.registerUser(request);
