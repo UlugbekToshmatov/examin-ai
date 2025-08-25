@@ -1,6 +1,7 @@
-package ai.examin.admin.model.program;
+package ai.examin.admin.model.program.entity;
 
-import ai.examin.admin.model.course.Course;
+import ai.examin.admin.model.course.entity.Course;
+import ai.examin.core.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +33,9 @@ public class Program {
 
     @Column(name = "approved", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean approved = false;
+
+    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'ACTIVE'")
+    private Status status = Status.ACTIVE;
 
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -1,6 +1,6 @@
-package ai.examin.admin.model.task;
+package ai.examin.admin.model.task.entity;
 
-import ai.examin.admin.model.program.Program;
+import ai.examin.admin.model.program.entity.Program;
 import ai.examin.core.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @Getter
 @Setter
-@Table(name = "tasks")
+@Table(name = "tasks", uniqueConstraints = @UniqueConstraint(columnNames = {"program_id", "title"}))
 @Entity
 public class Task {
     @Id

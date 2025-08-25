@@ -42,4 +42,9 @@ public class UserController {
         UserDetails userDetails = userService.loadUserByUsername(email);
         return ResponseEntity.ok((UserPrincipal) userDetails);
     }
+
+    @GetMapping("/internal/external-id/{external-id}")
+    public HttpEntity<UserResponse> getUserByExternalIdInternal(@PathVariable("external-id") String externalId) {
+        return ResponseEntity.ok(userService.getUserByExternalId(externalId));
+    }
 }

@@ -1,4 +1,4 @@
-package ai.examin.auth.model.user.dto;
+package ai.examin.admin.model.clients.auth.dto;
 
 import ai.examin.core.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonFormat;

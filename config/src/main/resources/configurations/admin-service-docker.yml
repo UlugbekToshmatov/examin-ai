@@ -24,3 +24,9 @@ spring:
     liquibase-schema: public
     drop-first: false
     contexts: development
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8181/realms/examinai

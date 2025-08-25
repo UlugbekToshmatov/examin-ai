@@ -1,7 +1,6 @@
-package ai.examin.admin.model.course;
+package ai.examin.admin.model.course.entity;
 
 import ai.examin.core.enums.CourseStatus;
-import ai.examin.core.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,15 +20,15 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "courses_id_seq")
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @Column(name = "supervisor_id", nullable = false)
     private Long supervisorId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private CourseStatus status;
+    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'CREATED'")
+    private CourseStatus status = CourseStatus.CREATED;
 
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt = LocalDateTime.now();

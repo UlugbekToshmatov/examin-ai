@@ -10,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 @Component
 @RequiredArgsConstructor
 public class UserMapper {
@@ -33,6 +31,7 @@ public class UserMapper {
     public static UserResponse fromUser(User user) {
         return UserResponse.builder()
             .id(user.getId())
+            .externalId(user.getExternalId())
             .username(user.getUsername())
             .firstName(user.getFirstName())
             .lastName(user.getLastName())

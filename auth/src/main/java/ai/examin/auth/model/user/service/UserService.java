@@ -63,6 +63,26 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
+    public UserResponse getUserById(Long id) {
+        UserResponse user = userRepository.findByIdAndStatus(id, Status.ACTIVE)
+            .map(UserMapper::fromUser)
+            .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
+
+        log.info("User response by id: {}", user);
+
+        return user;
+    }
+
+    public UserResponse getUserByExternalId(String externalId) {
+        UserResponse user = userRepository.findByExternalIdAndStatus(externalId, Status.ACTIVE)
+            .map(UserMapper::fromUser)
+            .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
+
+        log.info("User response by external id: {}", user);
+
+        return user;
+    }
+
     private Map<String, Object> getPayload(User user, String jwtToken) {
         HashMap<String, Object> payload = new HashMap<>();
         payload.put("firstName", user.getFirstName());
