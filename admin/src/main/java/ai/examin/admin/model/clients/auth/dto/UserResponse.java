@@ -2,7 +2,6 @@ package ai.examin.admin.model.clients.auth.dto;
 
 import ai.examin.core.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Builder
 @ToString
 public class UserResponse {
     private Long id;

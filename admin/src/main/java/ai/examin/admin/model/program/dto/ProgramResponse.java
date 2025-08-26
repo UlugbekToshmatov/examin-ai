@@ -20,9 +20,9 @@ public class ProgramResponse {
     private Boolean approved;
 
 
-    public ProgramResponse(Program program, Course course) {
+    public ProgramResponse(Program program) {
         this.id = program.getId();
-        this.course = new CourseResponseMin(course);
+        this.course = new CourseResponseMin(program.getCourse());
         this.expertId = program.getExpertId();
         this.description = program.getDescription();
         this.approved = program.getApproved();

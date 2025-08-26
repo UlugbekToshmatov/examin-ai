@@ -27,12 +27,15 @@ public class Task {
     @Column(name = "mentor_id", nullable = false)
     private Long mentorId;
 
+    @Column(name = "title", nullable = false)
+    private String title;
+
     @Column(name = "definition", nullable = false)
     private String definition;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private TaskStatus status;
+    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'IN_PROGRESS'")
+    private TaskStatus status = TaskStatus.IN_PROGRESS;
 
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt = LocalDateTime.now();

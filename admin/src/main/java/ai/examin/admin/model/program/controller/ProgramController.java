@@ -105,7 +105,7 @@ public class ProgramController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpResponse> delete(@PathVariable Long id) {
-        programService.delete(id);
+        programService.deleteById(id);
 
         return ResponseEntity.ok(
             HttpResponse.builder()

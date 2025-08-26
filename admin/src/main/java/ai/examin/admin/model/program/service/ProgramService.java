@@ -6,6 +6,7 @@ import ai.examin.admin.model.course.entity.Course;
 import ai.examin.admin.model.course.repository.CourseRepository;
 import ai.examin.admin.model.program.dto.*;
 import ai.examin.admin.model.program.entity.Program;
+import ai.examin.admin.model.program.mapper.ProgramMapper;
 import ai.examin.admin.model.program.repository.ProgramRepository;
 import ai.examin.core.enums.CourseStatus;
 import ai.examin.core.enums.ResponseStatus;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,10 +39,9 @@ public class ProgramService {
     }
 
     public ProgramResponse getById(Long id) {
-        Program program = programRepository.findByIdAndStatusNot(id, Status.DELETED)
+        return programRepository.findByIdAndStatusNot(id, Status.DELETED)
+            .map(ProgramMapper::toResponse)
             .orElseThrow(() -> new ApiException(ResponseStatus.PROGRAM_NOT_FOUND));
-
-        return toResponse(program, program.getCourse());
     }
 
     public ProgramResponse create(ProgramRequest request) {
@@ -53,67 +54,127 @@ public class ProgramService {
             if (request.expertId() == null)
                 throw new ApiException(ResponseStatus.EXPERT_ID_REQUIRED);
 
-            UserResponse user = authClient.getUserById(request.expertId());
-
-            if (user == null)
+            UserResponse expert = authClient.getUserById(request.expertId());
+            if (expert == null)
                 throw new ApiException(ResponseStatus.USER_NOT_FOUND);
 
-            program = programRepository.save(toEntity(request));
+            program = programRepository.save(toEntity(request, course));
         } else {
             Optional<String> currentUserExternalId = userContextService.getCurrentUserId();
             if (currentUserExternalId.isEmpty()) {
-                log.error("User details are not present in the context in ProgramService.create()");
+                log.error("User details are not present in the context for expert in ProgramService.create()");
                 throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
             }
 
-            UserResponse userResponse = authClient.getUserByExternalId(currentUserExternalId.get());
-
-            if (userResponse == null)
+            UserResponse expert = authClient.getUserByExternalId(currentUserExternalId.get());
+            if (expert == null)
                 throw new ApiException(ResponseStatus.USER_NOT_FOUND);
 
-            program = programRepository.save(toEntity(request, userResponse.getId()));
+            program = programRepository.save(toEntity(request, course, expert.getId()));
         }
 
-        return toResponse(program, course);
+        return toResponse(program);
     }
 
     public ProgramResponse updateById(Long id, ProgramUpdateRequest request) {
         Program program = programRepository.findByIdAndStatusNot(id, Status.DELETED)
             .orElseThrow(() -> new ApiException(ResponseStatus.PROGRAM_NOT_FOUND));
 
-        UserResponse user = authClient.getUserById(request.expertId());
+        Optional<String> currentUserId = userContextService.getCurrentUserId();
+        if (currentUserId.isEmpty()) {
+            log.error("User details are not present in the context for supervisor in ProgramService.updateById()");
+            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
+        }
 
-        if (user == null)
+        UserResponse supervisor = authClient.getUserByExternalId(currentUserId.get());
+        if (supervisor == null)
+            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
+
+        if (!program.getCourse().getSupervisorId().equals(supervisor.getId()))
+            throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
+
+        UserResponse expert = authClient.getUserById(request.expertId());
+        if (expert == null)
             throw new ApiException(ResponseStatus.USER_NOT_FOUND);
 
         update(request, program);
 
-        return toResponse(programRepository.save(program), program.getCourse());
+        return toResponse(programRepository.save(program));
     }
 
     public ProgramResponse updateDescription(Long id, ProgramDescriptionUpdateRequest request) {
         Program program = programRepository.findByIdAndStatusNot(id, Status.DELETED)
             .orElseThrow(() -> new ApiException(ResponseStatus.PROGRAM_NOT_FOUND));
 
-        program.setDescription(request.description());
+        Optional<String> currentUserId = userContextService.getCurrentUserId();
+        if (currentUserId.isEmpty()) {
+            log.error("User details are not present in the context in ProgramService.updateDescription()");
+            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
+        }
 
-        return toResponse(programRepository.save(program), program.getCourse());
+        UserResponse currentUser = authClient.getUserByExternalId(currentUserId.get());
+        if (currentUser == null)
+            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
+
+        if (userContextService.getCurrentUserRoles().contains("ROLE_" + UserRole.SUPERVISOR.name())) {
+            if (!program.getCourse().getSupervisorId().equals(currentUser.getId()))
+                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
+        } else {
+            if (!program.getExpertId().equals(currentUser.getId()))
+                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
+        }
+
+        update(request, program);
+
+        return toResponse(programRepository.save(program));
     }
 
     public ProgramResponse updateApproval(Long id) {
         Program program = programRepository.findByIdAndStatusNot(id, Status.DELETED)
             .orElseThrow(() -> new ApiException(ResponseStatus.PROGRAM_NOT_FOUND));
 
-        program.setApproved(!program.getApproved());
+        Optional<String> currentUserId = userContextService.getCurrentUserId();
+        if (currentUserId.isEmpty()) {
+            log.error("User details are not present in the context for supervisor in ProgramService.updateApproval()");
+            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
+        }
 
-        return toResponse(programRepository.save(program), program.getCourse());
+        UserResponse supervisor = authClient.getUserByExternalId(currentUserId.get());
+        if (supervisor == null)
+            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
+
+        if (!program.getCourse().getSupervisorId().equals(supervisor.getId()))
+            throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
+
+        program.setApproved(!program.getApproved());
+        program.setUpdatedAt(LocalDateTime.now());
+
+        return toResponse(programRepository.save(program));
     }
 
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         Program program = programRepository.findByIdAndStatusNot(id, Status.DELETED)
             .orElseThrow(() -> new ApiException(ResponseStatus.PROGRAM_NOT_FOUND));
 
-        program.setStatus(Status.DELETED);
+        Optional<String> currentUserId = userContextService.getCurrentUserId();
+        if (currentUserId.isEmpty()) {
+            log.error("User details are not present in the context in ProgramService.deleteById()");
+            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
+        }
+
+        UserResponse currentUser = authClient.getUserByExternalId(currentUserId.get());
+        if (currentUser == null)
+            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
+
+        if (userContextService.getCurrentUserRoles().contains("ROLE_" + UserRole.SUPERVISOR.name())) {
+            if (!program.getCourse().getSupervisorId().equals(currentUser.getId()))
+                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
+        } else {
+            if (!program.getExpertId().equals(currentUser.getId()))
+                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
+        }
+
+        delete(program);
         programRepository.save(program);
     }
 }

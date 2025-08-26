@@ -37,8 +37,11 @@ public enum ResponseStatus {
     LISTENER_CONTAINER_ALREADY_STOPPED(202, HttpStatus.BAD_REQUEST, "Listener container already stopped"),
     COURSE_NOT_FOUND(300, HttpStatus.NOT_FOUND, "Course not found"),
     COURSE_ALREADY_EXISTS(301, HttpStatus.BAD_REQUEST, "Course with this name already exists"),
-    PROGRAM_NOT_FOUND(400, HttpStatus.NOT_FOUND, "Program not found"),
-    EXPERT_ID_REQUIRED(401, HttpStatus.BAD_REQUEST, "Expert ID is required");
+    PROGRAM_NOT_FOUND(302, HttpStatus.NOT_FOUND, "Program not found"),
+    EXPERT_ID_REQUIRED(303, HttpStatus.BAD_REQUEST, "Expert ID is required"),
+    TASK_ALREADY_EXISTS(304, HttpStatus.BAD_REQUEST, "Task with this name already exists in this program"),
+    TASK_NOT_FOUND(305, HttpStatus.NOT_FOUND, "Task not found"),
+    MENTOR_ID_REQUIRED(306, HttpStatus.BAD_REQUEST, "Mentor ID is required");
 
 
     private final Integer statusCode;

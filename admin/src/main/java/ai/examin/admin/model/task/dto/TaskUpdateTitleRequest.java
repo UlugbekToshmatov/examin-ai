@@ -1,14 +1,8 @@
 package ai.examin.admin.model.task.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
-public record TaskRequest(
-    @NotNull(message = "Program ID is required")
-    Long programId,
-
-    Long mentorId,
-
+public record TaskUpdateTitleRequest(
     @NotBlank(message = "Title is required")
     String title,
 
