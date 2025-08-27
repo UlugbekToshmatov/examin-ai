@@ -2,7 +2,7 @@ package ai.examin.auth.model.keycloak.service;
 
 import ai.examin.auth.model.user.dto.UserRequest;
 import ai.examin.core.enums.ResponseStatus;
-import ai.examin.core.enums.UserRole;
+import ai.examin.core.enums.Role;
 import ai.examin.core.exception_handler.ApiException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -46,20 +46,20 @@ public class KeycloakService {
                     );
                     CompletableFuture.runAsync(() -> verifyEmail(userId));
                     getUserResource(userId).roles().realmLevel().add(
-                        Collections.singletonList(getRoleRepresentation(UserRole.INTERN.name()))
+                        Collections.singletonList(getRoleRepresentation(Role.INTERN.name()))
                     );
                     user.setId(userId);
                     return user;
                 } else
                     throw new ApiException(ResponseStatus.ERROR_REGISTERING_USER);
             } else if (response.getStatus() == 409) {
-                log.error("User with email: {} or username: {} already exists", request.email(), request.username());
+                log.error("User with email: {} or username: {} already exists", request.getEmail(), request.getUsername());
                 throw new ApiException(ResponseStatus.EMAIL_OR_USERNAME_ALREADY_REGISTERED);
             } else
                 throw new ApiException(ResponseStatus.ERROR_REGISTERING_USER);
         } catch (Exception e) {
             log.error("Failed to register user with email: {} and username: {}. Cause: {}",
-                request.email(), request.username(), e.getMessage());
+                request.getEmail(), request.getUsername(), e.getMessage());
             throw e;
         }
     }

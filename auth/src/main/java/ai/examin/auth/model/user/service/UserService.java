@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -63,7 +64,7 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-    public UserResponse getUserById(Long id) {
+    public UserResponse getUserById(UUID id) {
         UserResponse user = userRepository.findByIdAndStatus(id, Status.ACTIVE)
             .map(UserMapper::toResponse)
             .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
@@ -73,15 +74,15 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-    public UserResponse getUserByExternalId(String externalId) {
-        UserResponse user = userRepository.findByExternalIdAndStatus(externalId, Status.ACTIVE)
-            .map(UserMapper::toResponse)
-            .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
-
-        log.info("User response by external id: {}", user);
-
-        return user;
-    }
+//    public UserResponse getUserByExternalId(String externalId) {
+//        UserResponse user = userRepository.findByExternalIdAndStatus(externalId, Status.ACTIVE)
+//            .map(UserMapper::toResponse)
+//            .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
+//
+//        log.info("User response by external id: {}", user);
+//
+//        return user;
+//    }
 
     private Map<String, Object> getPayload(User user, String jwtToken) {
         HashMap<String, Object> payload = new HashMap<>();

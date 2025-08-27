@@ -1,11 +1,12 @@
 package ai.examin.auth.model.user.entity;
 
 import ai.examin.core.enums.Status;
-import ai.examin.core.enums.UserRole;
+import ai.examin.core.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,12 +17,8 @@ import java.time.LocalDateTime;
 @Entity
 public class User {
     @Id
-    @SequenceGenerator(name = "users_id_seq", sequenceName = "users_id_seq", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_seq")
-    private Long id;
-
-    @Column(name = "external_id", nullable = false, unique = true)
-    private String externalId;
+    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "UUID")
+    private UUID id;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -40,7 +37,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private UserRole role;
+    private Role role;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

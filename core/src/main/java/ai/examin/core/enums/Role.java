@@ -1,5 +1,5 @@
 package ai.examin.core.enums;
 
-public enum UserRole {
+public enum Role {
     SUPERVISOR, EXPERT, MENTOR, INTERN, ADMIN
 }

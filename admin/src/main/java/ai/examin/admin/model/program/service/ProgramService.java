@@ -11,7 +11,7 @@ import ai.examin.admin.model.program.repository.ProgramRepository;
 import ai.examin.core.enums.CourseStatus;
 import ai.examin.core.enums.ResponseStatus;
 import ai.examin.core.enums.Status;
-import ai.examin.core.enums.UserRole;
+import ai.examin.core.enums.Role;
 import ai.examin.core.exception_handler.ApiException;
 import ai.examin.core.utils.UserContextService;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +50,7 @@ public class ProgramService {
 
         Program program;
 
-        if (userContextService.getCurrentUserRoles().contains("ROLE_" + UserRole.SUPERVISOR.name())) {
+        if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.SUPERVISOR.name())) {
             if (request.expertId() == null)
                 throw new ApiException(ResponseStatus.EXPERT_ID_REQUIRED);
 
@@ -116,7 +116,7 @@ public class ProgramService {
         if (currentUser == null)
             throw new ApiException(ResponseStatus.USER_NOT_FOUND);
 
-        if (userContextService.getCurrentUserRoles().contains("ROLE_" + UserRole.SUPERVISOR.name())) {
+        if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.SUPERVISOR.name())) {
             if (!program.getCourse().getSupervisorId().equals(currentUser.getId()))
                 throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
         } else {
@@ -166,7 +166,7 @@ public class ProgramService {
         if (currentUser == null)
             throw new ApiException(ResponseStatus.USER_NOT_FOUND);
 
-        if (userContextService.getCurrentUserRoles().contains("ROLE_" + UserRole.SUPERVISOR.name())) {
+        if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.SUPERVISOR.name())) {
             if (!program.getCourse().getSupervisorId().equals(currentUser.getId()))
                 throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
         } else {

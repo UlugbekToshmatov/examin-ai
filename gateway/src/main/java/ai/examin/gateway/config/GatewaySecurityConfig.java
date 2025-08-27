@@ -46,7 +46,8 @@ public class GatewaySecurityConfig {
                 .pathMatchers("/api/v1/user/**").hasRole("INTERN")
                 .pathMatchers("/api/v1/tasks/**").hasAnyRole("MENTOR", "INTERN")
                 .pathMatchers("/api/v1/courses/**").hasRole("SUPERVISOR")
-                .pathMatchers("/eureka/**").hasRole("SUPERVISOR")
+//                .pathMatchers("/eureka/**").hasRole("SUPERVISOR")
+                .pathMatchers("/eureka/**").permitAll()
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2

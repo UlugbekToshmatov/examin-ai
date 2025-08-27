@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -43,8 +44,8 @@ public class UserController {
         return ResponseEntity.ok((UserPrincipal) userDetails);
     }
 
-    @GetMapping("/internal/external-id/{external-id}")
-    public HttpEntity<UserResponse> getUserByExternalIdInternal(@PathVariable("external-id") String externalId) {
-        return ResponseEntity.ok(userService.getUserByExternalId(externalId));
+    @GetMapping("/internal/id/{id}")
+    public HttpEntity<UserResponse> getUserByIdInternal(@PathVariable UUID id) {
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 }

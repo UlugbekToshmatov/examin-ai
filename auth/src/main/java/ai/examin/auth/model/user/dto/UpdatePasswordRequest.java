@@ -1,16 +1,23 @@
 package ai.examin.auth.model.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
-public record UpdatePasswordRequest(
-    @NotNull(message = "Id is required")
-    Long id,
+import java.util.UUID;
+
+@Getter
+@Setter
+public class UpdatePasswordRequest {
+    @NotBlank(message = "Id is required")
+    private UUID id;
+
     @NotBlank(message = "Old password is required")
-    String oldPassword,
+    private String oldPassword;
+
     @NotBlank(message = "New password is required")
-    String newPassword,
+    private String newPassword;
+
     @NotBlank(message = "Confirm password is required")
-    String confirmPassword
-) {
+    private String confirmPassword;
 }

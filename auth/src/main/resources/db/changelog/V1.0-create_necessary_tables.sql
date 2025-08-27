@@ -1,10 +1,13 @@
--- Create users table
+-- Drop table tokens
+DROP TABLE IF EXISTS tokens CASCADE;
+
+-- Drop table users
 DROP TABLE IF EXISTS users CASCADE;
 
+-- Create users table
 CREATE TABLE users
 (
-    id            BIGSERIAL    PRIMARY KEY,
-    external_id   VARCHAR(255) NOT NULL UNIQUE,
+    id            UUID         PRIMARY KEY,
     username      VARCHAR(255) NOT NULL UNIQUE,
     first_name    VARCHAR(255) NOT NULL,
     last_name     VARCHAR(255) NOT NULL,
@@ -21,8 +24,6 @@ CREATE TABLE users
 );
 
 -- Create tokens table
-DROP TABLE IF EXISTS tokens CASCADE;
-
 CREATE TABLE tokens
 (
     id         BIGSERIAL     PRIMARY KEY,
@@ -32,6 +33,6 @@ CREATE TABLE tokens
     expires_at TIMESTAMP     NOT NULL,
     revoked    BOOLEAN       DEFAULT FALSE,
     expired    BOOLEAN       DEFAULT FALSE,
-    user_id    BIGINT        NOT NULL,
+    user_id    UUID          NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );

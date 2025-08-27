@@ -3,6 +3,7 @@ package ai.examin.auth.model.keycloak.mapper;
 import ai.examin.auth.model.user.dto.UserRequest;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.BeanUtils;
 
 import java.util.Collections;
 
@@ -13,20 +14,17 @@ public class KeycloakMapper {
 
     public static UserRepresentation getUserRepresentation(UserRequest request) {
         UserRepresentation user = new UserRepresentation();
-        user.setUsername(request.username().trim().toLowerCase());
-        user.setEmail(request.email().trim().toLowerCase());
-        user.setFirstName(request.firstName().trim());
-        user.setLastName(request.lastName().trim());
+        BeanUtils.copyProperties(request, user, "password");
         user.setEnabled(TRUE);
         user.setEmailVerified(FALSE);
-        user.setCredentials(Collections.singletonList(getCredentialRepresentation(request.password())));
+        user.setCredentials(Collections.singletonList(getCredentialRepresentation(request.getPassword())));
         return user;
     }
 
     public static CredentialRepresentation getCredentialRepresentation(String password) {
         CredentialRepresentation credentials = new CredentialRepresentation();
         credentials.setType(CredentialRepresentation.PASSWORD);
-        credentials.setValue(password.trim());
+        credentials.setValue(password);
         credentials.setTemporary(FALSE);
         return credentials;
     }

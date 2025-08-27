@@ -39,9 +39,19 @@ spring:
         - id: discovery-service
           uri: http://localhost:8761
           predicates:
-            - Path=/eureka/**
+            - Path=/eureka/web
+            - Method=GET      # This route matches only GET requests
           filters:
             - SetPath=/
+            - RemoveRequestHeader=Cookie
+
+        # For getting HTML&CSS properties of the Eureka server page
+        - id: discovery-service-static
+          uri: http://localhost:8761
+          predicates:
+            - Path=/eureka/**
+            - Method=GET
+          filters:
             - RemoveRequestHeader=Cookie
 
   security:

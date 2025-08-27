@@ -11,7 +11,7 @@ import ai.examin.admin.model.task.repository.TaskRepository;
 import ai.examin.core.enums.ResponseStatus;
 import ai.examin.core.enums.Status;
 import ai.examin.core.enums.TaskStatus;
-import ai.examin.core.enums.UserRole;
+import ai.examin.core.enums.Role;
 import ai.examin.core.exception_handler.ApiException;
 import ai.examin.core.utils.UserContextService;
 import lombok.RequiredArgsConstructor;
@@ -57,8 +57,8 @@ public class TaskService {
 
         Task task;
 
-        if (userContextService.getCurrentUserRoles().contains("ROLE_" + UserRole.SUPERVISOR.name())
-        || userContextService.getCurrentUserRoles().contains("ROLE_" + UserRole.EXPERT.name())) {
+        if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.SUPERVISOR.name())
+        || userContextService.getCurrentUserRoles().contains("ROLE_" + Role.EXPERT.name())) {
             if (request.mentorId() == null)
                 throw new ApiException(ResponseStatus.MENTOR_ID_REQUIRED);
 
@@ -67,7 +67,7 @@ public class TaskService {
             if (mentor == null)
                 throw new ApiException(ResponseStatus.USER_NOT_FOUND);
 
-            if (!mentor.getRole().equals(UserRole.MENTOR))
+            if (!mentor.getRole().equals(Role.MENTOR))
                 throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
 
             task = taskRepository.save(toEntity(request, program));
@@ -143,10 +143,10 @@ public class TaskService {
         if (currentUser == null)
             throw new ApiException(ResponseStatus.USER_NOT_FOUND);
 
-        if (userContextService.getCurrentUserRoles().contains("ROLE_" + UserRole.SUPERVISOR.name())) {
+        if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.SUPERVISOR.name())) {
             if (!task.getProgram().getCourse().getSupervisorId().equals(currentUser.getId()))
                 throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
-        } else if (userContextService.getCurrentUserRoles().contains("ROLE_" + UserRole.EXPERT.name())) {
+        } else if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.EXPERT.name())) {
             if (!task.getProgram().getExpertId().equals(currentUser.getId()))
                 throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
         } else {

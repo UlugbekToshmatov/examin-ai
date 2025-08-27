@@ -1,29 +1,29 @@
 package ai.examin.auth.model.user.mapper;
 
+import ai.examin.auth.model.user.dto.UpdatePasswordRequest;
 import ai.examin.auth.model.user.dto.UserRequest;
 import ai.examin.auth.model.user.dto.UserResponse;
 import ai.examin.auth.model.user.entity.User;
 import ai.examin.core.enums.Status;
-import ai.examin.core.enums.UserRole;
+import ai.examin.core.enums.Role;
 import ai.examin.core.security.UserPayload;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
 public class UserMapper {
 
-    public static User toEntity(UserRequest userRequest, PasswordEncoder passwordEncoder) {
+    public static User toEntity(UserRequest userRequest, PasswordEncoder passwordEncoder, String id) {
         User user = new User();
-        user.setExternalId("dummyValue");
-        user.setUsername(userRequest.username().trim().toLowerCase());
-        user.setFirstName(userRequest.firstName().trim());
-        user.setLastName(userRequest.lastName().trim());
-        user.setEmail(userRequest.email().trim().toLowerCase());
-        user.setPassword(passwordEncoder.encode(userRequest.password().trim()));
-        user.setRole(UserRole.INTERN);
+        BeanUtils.copyProperties(userRequest, user, "password");
+        user.setId(UUID.fromString(id));
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        user.setRole(Role.INTERN);
         user.setStatus(Status.PENDING_VERIFICATION);
 
         return user;
@@ -49,5 +49,19 @@ public class UserMapper {
         userPayload.setAccessToken(jwtToken);
 
         return userPayload;
+    }
+
+    public static void trimRequest(UserRequest request) {
+        request.setUsername(request.getUsername().trim().toLowerCase());
+        request.setFirstName(request.getFirstName().trim());
+        request.setLastName(request.getLastName().trim());
+        request.setEmail(request.getEmail().trim().toLowerCase());
+        request.setPassword(request.getPassword().trim());
+    }
+
+    public static void trimPasswords(UpdatePasswordRequest request) {
+        request.setOldPassword(request.getOldPassword().trim());
+        request.setNewPassword(request.getNewPassword().trim());
+        request.setConfirmPassword(request.getConfirmPassword().trim());
     }
 }

@@ -1,6 +1,6 @@
 package ai.examin.admin.security;
 
-import ai.examin.core.enums.UserRole;
+import ai.examin.core.enums.Role;
 import ai.examin.core.exception_handler.CustomAccessDeniedHandler;
 import ai.examin.core.exception_handler.CustomAuthenticationEntryPoint;
 import ai.examin.core.security.keycloak.KeycloakJwtAuthConverter;
@@ -31,11 +31,11 @@ public class WebSecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET, "/api/v1/admin/course/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/admin/program/**").permitAll()
-                .requestMatchers("/api/v1/admin/course/**").hasRole(UserRole.SUPERVISOR.name())
-                .requestMatchers("/api/v1/admin/program/**").hasAnyRole(UserRole.SUPERVISOR.name(), UserRole.EXPERT.name())
-                .requestMatchers("/api/v1/admin/task/**").hasAnyRole(UserRole.SUPERVISOR.name(), UserRole.MENTOR.name(), UserRole.INTERN.name())
+                .requestMatchers(HttpMethod.GET, "/api/v1/course/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/program/**").permitAll()
+                .requestMatchers("/api/v1/course/**").hasRole(Role.SUPERVISOR.name())
+                .requestMatchers("/api/v1/program/**").hasAnyRole(Role.SUPERVISOR.name(), Role.EXPERT.name())
+                .requestMatchers("/api/v1/task/**").hasAnyRole(Role.SUPERVISOR.name(), Role.MENTOR.name(), Role.INTERN.name())
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(
