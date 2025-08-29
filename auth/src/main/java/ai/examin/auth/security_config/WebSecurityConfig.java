@@ -1,5 +1,6 @@
 package ai.examin.auth.security_config;
 
+import ai.examin.core.enums.Role;
 import ai.examin.core.exception_handler.CustomAccessDeniedHandler;
 import ai.examin.core.exception_handler.CustomAuthenticationEntryPoint;
 import ai.examin.core.security.keycloak.KeycloakJwtAuthConverter;
@@ -33,7 +34,7 @@ public class WebSecurityConfig {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PUBLIC_URLS).permitAll()
-                .requestMatchers("/api/v1/user/email/**").hasRole("INTERN")
+                .requestMatchers("/api/v1/user/email/**").hasRole(Role.INTERN.name())
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(

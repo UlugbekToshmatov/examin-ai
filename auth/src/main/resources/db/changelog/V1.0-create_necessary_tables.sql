@@ -14,11 +14,14 @@ CREATE TABLE users
     email         VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role          VARCHAR(20)  NOT NULL,
-    status        VARCHAR(20)  NOT NULL,
+    status        VARCHAR(50)  NOT NULL,
     image_url     VARCHAR(255) DEFAULT 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
     created_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    updated_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    created_by    UUID,
+    updated_at    TIMESTAMP,
+    updated_by    UUID,
     deleted_at    TIMESTAMP,
+    deleted_by    UUID,
     CONSTRAINT chk_users_role CHECK (role IN ('SUPERVISOR', 'EXPERT', 'MENTOR', 'INTERN', 'ADMIN')),
     CONSTRAINT chk_users_status CHECK (status IN ('ACTIVE', 'PENDING_VERIFICATION', 'BLOCKED', 'DELETED'))
 );

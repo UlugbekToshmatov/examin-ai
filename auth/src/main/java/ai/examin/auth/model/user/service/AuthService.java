@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static ai.examin.auth.model.user.mapper.UserMapper.*;
 
@@ -48,7 +49,7 @@ public class AuthService {
             userRepository.save(user);
         } catch (Exception e) {
             log.error("Failed to save user with email='{}'. Cause: {}", registeredUser.getEmail(), e.getMessage());
-            // TODO: Delete user from keycloak
+            keycloakService.deleteUser(registeredUser.getId());
         }
     }
 
@@ -63,8 +64,8 @@ public class AuthService {
     }
 
     @Transactional
-    public void resetPassword(UpdatePasswordRequest request) {
-        User user = userRepository.findByIdAndStatus(request.getId(), Status.ACTIVE)
+    public void resetPassword(UUID id, UpdatePasswordRequest request) {
+        User user = userRepository.findByIdAndStatus(id, Status.ACTIVE)
             .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
 
         trimPasswords(request);
@@ -91,6 +92,21 @@ public class AuthService {
         userRepository.save(user);
 
         keycloakService.resetPassword(user.getId().toString(), request.getNewPassword());
+    }
+
+    public void deleteById(UUID id) {
+        User user = userRepository.findByIdAndStatus(id, Status.ACTIVE)
+            .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
+
+        Optional<String> currentUserId = userContextService.getCurrentUserId();
+        if (currentUserId.isEmpty()) {
+            log.error("User details are not present in the context for user with id: {}", id);
+            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
+        }
+        user.softDelete(UUID.fromString(currentUserId.get()));
+        userRepository.save(user);
+
+        keycloakService.deleteUser(user.getId().toString());
     }
 
 //    @Transactional

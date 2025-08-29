@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -46,14 +48,27 @@ public class AuthController {
     }
 
     @PutMapping("/reset-password")
-    public HttpEntity<HttpResponse> updatePassword(@RequestBody @Valid UpdatePasswordRequest request) {
-        authService.resetPassword(request);
+    public HttpEntity<HttpResponse> updatePassword(@RequestParam UUID id, @RequestBody @Valid UpdatePasswordRequest request) {
+        authService.resetPassword(id, request);
 
         return ResponseEntity.ok(
             HttpResponse.builder()
                 .statusCode(HttpStatus.OK.value())
                 .description(HttpStatus.OK.name())
                 .data("Password has been reset successfully.")
+                .build()
+        );
+    }
+
+    @DeleteMapping()
+    public HttpEntity<HttpResponse> deleteAccount(@RequestParam UUID id) {
+        authService.deleteById(id);
+
+        return ResponseEntity.ok(
+            HttpResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .description(HttpStatus.OK.name())
+                .data("Account has been deleted successfully.")
                 .build()
         );
     }

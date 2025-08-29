@@ -76,6 +76,11 @@ public class KeycloakService {
         user.resetPassword(credentialRepresentation);
     }
 
+    public void deleteUser(String userId) {
+        UserResource user = getUserById(userId);
+        user.remove();
+    }
+
     private UserResource getUserById(String userId) {
         UserResource user = getUserResource(userId);
 

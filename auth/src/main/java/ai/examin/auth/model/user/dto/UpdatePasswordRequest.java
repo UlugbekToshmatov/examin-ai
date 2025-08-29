@@ -4,14 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @Getter
 @Setter
 public class UpdatePasswordRequest {
-    @NotBlank(message = "Id is required")
-    private UUID id;
-
     @NotBlank(message = "Old password is required")
     private String oldPassword;
 

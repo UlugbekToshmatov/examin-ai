@@ -1,11 +1,13 @@
 package ai.examin.auth.model.user.entity;
 
-import ai.examin.core.enums.Status;
+import ai.examin.core.base_classes.BaseEntity;
 import ai.examin.core.enums.Role;
+import ai.examin.core.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -15,7 +17,7 @@ import java.util.UUID;
 @Setter
 @Table(name = "users")
 @Entity
-public class User {
+public class User extends BaseEntity {
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "UUID")
     private UUID id;
@@ -46,12 +48,15 @@ public class User {
     @Column(name = "image_url", columnDefinition = "VARCHAR(255) DEFAULT 'https://cdn-icons-png.flaticon.com/512/149/149071.png'")
     private String imageUrl = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at", updatable = false)
-    private LocalDateTime deletedAt;
+    @Override
+    public void softDelete(UUID currentUserId) {
+        if (status != null && !status.name().equals("DELETED")) {
+            if (getDeletedAt() == null) setDeletedAt(LocalDateTime.now());
+            if (getDeletedBy() == null) setDeletedBy(currentUserId);
+            status = Status.DELETED;
+            username = String.format("%s_deleted_at_%s", username, DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss:SSS").format(getDeletedAt()));
+            email = String.format("%s_deleted_at_%s", email, DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss:SSS").format(getDeletedAt()));
+        }
+    }
 }
