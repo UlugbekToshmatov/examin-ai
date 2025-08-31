@@ -1,6 +1,6 @@
 package ai.examin.admin.model.task.dto;
 
-import ai.examin.admin.model.program.dto.ProgramResponseMin;
+import ai.examin.admin.model.course.dto.CourseResponseMin;
 import ai.examin.admin.model.task.entity.Task;
 import ai.examin.core.enums.TaskStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,14 +9,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskResponse {
     private Long id;
-    private ProgramResponseMin program;
-    private Long mentorId;
+    private CourseResponseMin course;
+    private UUID mentorId;
     private String title;
     private String definition;
     private TaskStatus status;
@@ -26,7 +28,7 @@ public class TaskResponse {
 
     public TaskResponse(Task task) {
         this.id = task.getId();
-        this.program = new ProgramResponseMin(task.getProgram());
+        this.course = new CourseResponseMin(task.getCourse());
         this.mentorId = task.getMentorId();
         this.title = task.getTitle();
         this.definition = task.getDefinition();

@@ -1,6 +1,9 @@
 package ai.examin.admin.model.program.controller;
 
-import ai.examin.admin.model.program.dto.*;
+import ai.examin.admin.model.program.dto.ProgramRequest;
+import ai.examin.admin.model.program.dto.ProgramResponse;
+import ai.examin.admin.model.program.dto.ProgramResponseMin;
+import ai.examin.admin.model.program.dto.ProgramUpdateRequest;
 import ai.examin.admin.model.program.service.ProgramService;
 import ai.examin.core.base_classes.HttpResponse;
 import ai.examin.core.enums.ResponseStatus;
@@ -8,7 +11,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,13 +31,13 @@ public class ProgramController {
             HttpResponse.builder()
                 .statusCode(ResponseStatus.OK.getStatusCode())
                 .description(ResponseStatus.OK.getDescription())
-                .data(Map.of("programs", programs))
+                .data(Map.of("program", programs))
                 .build()
         );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HttpResponse> get(@PathVariable Long id) {
+    public ResponseEntity<HttpResponse> getById(@PathVariable Long id) {
         ProgramResponse program = programService.getById(id);
 
         return ResponseEntity.ok(
@@ -49,56 +51,26 @@ public class ProgramController {
 
     @PostMapping()
     public ResponseEntity<HttpResponse> create(@RequestBody @Valid ProgramRequest request) {
-        ProgramResponse programResponse = programService.create(request);
+        ProgramResponse program = programService.create(request);
 
         return ResponseEntity.ok(
             HttpResponse.builder()
                 .statusCode(HttpStatus.CREATED.value())
                 .description(HttpStatus.CREATED.name())
-                .data(Map.of("programResponse", programResponse))
+                .data(Map.of("program", program))
                 .build()
         );
     }
 
-    @PreAuthorize(value = "hasRole('SUPERVISOR')")
     @PutMapping("/{id}")
     public ResponseEntity<HttpResponse> update(@PathVariable Long id, @RequestBody @Valid ProgramUpdateRequest request) {
-        ProgramResponse programResponse = programService.updateById(id, request);
+        ProgramResponse program = programService.updateById(id, request);
 
         return ResponseEntity.ok(
             HttpResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .description(HttpStatus.OK.name())
-                .data(Map.of("programResponse", programResponse))
-                .build()
-        );
-    }
-
-    @PutMapping("/description/{id}")
-    public ResponseEntity<HttpResponse> updateDescription(
-        @PathVariable Long id, @RequestBody @Valid ProgramDescriptionUpdateRequest request
-    ) {
-        ProgramResponse programResponse = programService.updateDescription(id, request);
-
-        return ResponseEntity.ok(
-            HttpResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .description(HttpStatus.OK.name())
-                .data(Map.of("programResponse", programResponse))
-                .build()
-        );
-    }
-
-    @PreAuthorize(value = "hasRole('SUPERVISOR')")
-    @PutMapping("/approval/{id}")
-    public ResponseEntity<HttpResponse> updateApproval(@PathVariable Long id) {
-        ProgramResponse programResponse = programService.updateApproval(id);
-
-        return ResponseEntity.ok(
-            HttpResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .description(HttpStatus.OK.name())
-                .data(Map.of("programResponse", programResponse))
+                .statusCode(ResponseStatus.OK.getStatusCode())
+                .description(ResponseStatus.OK.getDescription())
+                .data(Map.of("program", program))
                 .build()
         );
     }
@@ -109,8 +81,8 @@ public class ProgramController {
 
         return ResponseEntity.ok(
             HttpResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .description(HttpStatus.OK.name())
+                .statusCode(ResponseStatus.OK.getStatusCode())
+                .description(ResponseStatus.OK.getDescription())
                 .data("Program deleted successfully")
                 .build()
         );

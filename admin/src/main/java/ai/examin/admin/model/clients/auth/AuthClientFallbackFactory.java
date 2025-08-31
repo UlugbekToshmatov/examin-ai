@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -26,6 +28,12 @@ public class AuthClientFallbackFactory implements FallbackFactory<AuthClient> {
             public UserResponse getUserById(Long id) {
                 log.error("Failed to get user by id: {}. Cause: {}", id, cause.getMessage());
                 // Return null object as a fallback
+                return null;
+            }
+
+            @Override
+            public UserResponse getUserByIdInternal(UUID id) {
+                log.error("Failed to get user by id: {}. Cause: {}", id, cause.getMessage());
                 return null;
             }
 

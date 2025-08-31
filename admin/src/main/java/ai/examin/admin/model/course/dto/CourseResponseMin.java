@@ -1,7 +1,10 @@
 package ai.examin.admin.model.course.dto;
 
 import ai.examin.admin.model.course.entity.Course;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter

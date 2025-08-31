@@ -1,9 +1,11 @@
 package ai.examin.admin.model.task.entity;
 
+import ai.examin.core.base_classes.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "task_interns", uniqueConstraints = {@UniqueConstraint(columnNames = {"task_id", "intern_id"})})
 @Entity
-public class TaskIntern {
+public class TaskIntern extends BaseEntity {
     @Id
     @SequenceGenerator(name = "task_interns_id_seq", sequenceName = "task_interns_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_interns_id_seq")
@@ -23,14 +25,14 @@ public class TaskIntern {
     private Task task;
 
     @Column(name = "intern_id", nullable = false)
-    private Long internId;
+    private UUID internId;
 
     @Column(name = "github_link", nullable = false, columnDefinition = "VARCHAR(500) DEFAULT 'NOT SUBMITTED'")
     private String githubLink;
 
-    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Override
+    public void softDelete(UUID currentUserId) {
+
+    }
 }

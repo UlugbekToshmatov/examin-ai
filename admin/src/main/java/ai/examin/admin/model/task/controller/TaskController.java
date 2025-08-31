@@ -36,7 +36,7 @@ public class TaskController {
 
     @GetMapping("/all/by-program/{program-id}")
     public ResponseEntity<HttpResponse> getAllByProgram(@PathVariable("program-id") Long programId) {
-        List<TaskResponseMin> tasks = taskService.getAllByProgramId(programId);
+        List<TaskResponseMin> tasks = taskService.getAllByCourseId(programId);
 
         return ResponseEntity.ok(
             HttpResponse.builder()

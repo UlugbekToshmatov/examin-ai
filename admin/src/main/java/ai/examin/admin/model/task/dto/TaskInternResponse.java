@@ -1,7 +1,7 @@
 package ai.examin.admin.model.task.dto;
 
 import ai.examin.admin.model.clients.auth.dto.UserResponse;
-import ai.examin.admin.model.program.dto.ProgramResponseMin;
+import ai.examin.admin.model.course.dto.CourseResponseMin;
 import ai.examin.core.enums.TaskStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class TaskInternResponse {
     private Long id;
-    private ProgramResponseMin program;
+    private CourseResponseMin course;
     private UserResponse mentor;
     private String title;
     private String definition;

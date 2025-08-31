@@ -1,12 +1,13 @@
 package ai.examin.admin.model.program.dto;
 
-import ai.examin.admin.model.course.dto.CourseResponseMin;
-import ai.examin.admin.model.course.entity.Course;
-import ai.examin.admin.model.program.entity.Program;
+import ai.examin.core.enums.ProgramStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,17 +15,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProgramResponse {
     private Long id;
-    private CourseResponseMin course;
-    private Long expertId;
-    private String description;
-    private Boolean approved;
-
-
-    public ProgramResponse(Program program) {
-        this.id = program.getId();
-        this.course = new CourseResponseMin(program.getCourse());
-        this.expertId = program.getExpertId();
-        this.description = program.getDescription();
-        this.approved = program.getApproved();
-    }
+    private String name;
+    private UUID supervisorId;
+    private ProgramStatus programStatus;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private String createdAt;
 }

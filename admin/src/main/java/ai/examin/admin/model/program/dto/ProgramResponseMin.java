@@ -12,11 +12,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProgramResponseMin {
     private Long id;
-    private String description;
+    private String name;
 
 
     public ProgramResponseMin(Program program) {
         this.id = program.getId();
-        this.description = program.getDescription();
+        this.name = program.getName();
     }
 }

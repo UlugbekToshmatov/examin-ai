@@ -51,7 +51,7 @@ public class User extends BaseEntity {
 
     @Override
     public void softDelete(UUID currentUserId) {
-        if (status != null && !status.name().equals("DELETED")) {
+        if (status != null && !status.equals(Status.DELETED)) {
             if (getDeletedAt() == null) setDeletedAt(LocalDateTime.now());
             if (getDeletedBy() == null) setDeletedBy(currentUserId);
             status = Status.DELETED;

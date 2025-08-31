@@ -10,8 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
-    Boolean existsByProgram_IdAndTitleAndStatusNot(Long programId, String title, TaskStatus status);
+    Boolean existsByCourse_IdAndTitleAndStatusNot(Long course_id, String title, TaskStatus status);
     Optional<Task> findByIdAndStatusNot(Long id, TaskStatus status);
     List<Task> findAllByStatusNot(TaskStatus status);
-    List<Task> findAllByProgramIdAndStatusNot(Long programId, TaskStatus taskStatus);
+    List<Task> findAllByCourse_IdAndStatusNot(Long courseId, TaskStatus taskStatus);
 }
