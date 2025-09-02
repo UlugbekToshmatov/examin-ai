@@ -1,6 +1,7 @@
 package ai.examin.admin.model.program.service;
 
-import ai.examin.admin.model.clients.auth.AuthClient;
+import ai.examin.admin.model.clients.auth.AuthServiceClient;
+import ai.examin.admin.model.clients.auth.dto.UserResponse;
 import ai.examin.admin.model.program.dto.ProgramRequest;
 import ai.examin.admin.model.program.dto.ProgramResponse;
 import ai.examin.admin.model.program.dto.ProgramResponseMin;
@@ -9,6 +10,7 @@ import ai.examin.admin.model.program.entity.Program;
 import ai.examin.admin.model.program.repository.ProgramRepository;
 import ai.examin.core.enums.ProgramStatus;
 import ai.examin.core.enums.ResponseStatus;
+import ai.examin.core.enums.Role;
 import ai.examin.core.exception_handler.ApiException;
 import ai.examin.core.utils.UserContextService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +30,7 @@ import static ai.examin.admin.model.program.mapper.ProgramMapper.*;
 public class ProgramService {
     private final ProgramRepository programRepository;
     private final UserContextService userContextService;
-    private final AuthClient authClient;
+    private final AuthServiceClient authServiceClient;
 
 
     public List<ProgramResponseMin> getAll() {
@@ -44,11 +46,22 @@ public class ProgramService {
         if (programRepository.existsByNameAndStatusNot(request.name(), ProgramStatus.DELETED))
             throw new ApiException(ResponseStatus.PROGRAM_ALREADY_EXISTS);
 
-        // TODO: Verify if supervisor exists in local DB
+        // Verify if supervisor exists in local DB
+        Optional<String> currentUserId = userContextService.getCurrentUserId();
+        if (currentUserId.isEmpty()) {
+            log.error("User details are not present in the context for supervisor in ProgramService.create()");
+            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
+        }
 
-        // TODO: Verify if mentor's role in local DB matches with the one in Keycloak
+        UserResponse supervisor = authServiceClient.getUserById(UUID.fromString(currentUserId.get()));
+        if (supervisor == null)
+            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
 
-        Program program = toEntity(request);
+        // Verify if supervisor's role in local DB matches with the one in Keycloak
+        if (!supervisor.getRole().equals(Role.SUPERVISOR))
+            throw new ApiException(ResponseStatus.ROLE_MISMATCH_EXCEPTION);
+
+        Program program = toEntity(request, supervisor.getId());
         return toResponse(programRepository.save(program));
     }
 

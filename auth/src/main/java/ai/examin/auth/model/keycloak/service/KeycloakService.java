@@ -91,6 +91,13 @@ public class KeycloakService {
         return user;
     }
 
+    public UserRepresentation getById(String userId) {
+        return getUsersResource().search(userId, 1, 1, TRUE)
+            .stream()
+            .findFirst()
+            .orElse(null);
+    }
+
     private UserRepresentation getUserByUsername(String username) {
         return getUsersResource()
             .searchByUsername(username.trim().toLowerCase(), TRUE)

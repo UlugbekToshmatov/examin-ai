@@ -8,6 +8,7 @@ import ai.examin.core.enums.Status;
 import ai.examin.core.enums.Role;
 import ai.examin.core.security.UserPayload;
 import lombok.RequiredArgsConstructor;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,22 @@ public class UserMapper {
         user.setStatus(Status.PENDING_VERIFICATION);
 
         return user;
+    }
+
+    public static User toEntity(UserRepresentation userRepresentation) {
+        User newUser = new User();
+        newUser.setId(UUID.fromString(userRepresentation.getId()));
+        newUser.setUsername(userRepresentation.getUsername());
+        newUser.setFirstName(userRepresentation.getFirstName());
+        newUser.setLastName(userRepresentation.getLastName());
+        newUser.setEmail(userRepresentation.getEmail());
+        newUser.setPassword("User registered through social login");
+        if (userRepresentation.isEmailVerified())
+            newUser.setStatus(Status.ACTIVE);
+        else
+            newUser.setStatus(Status.PENDING_VERIFICATION);
+
+        return newUser;
     }
 
     public static UserResponse toResponse(User user) {

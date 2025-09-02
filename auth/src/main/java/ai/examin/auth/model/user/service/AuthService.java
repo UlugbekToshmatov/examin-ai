@@ -32,6 +32,18 @@ public class AuthService {
     private final UserContextService userContextService;
 
 
+    public void syncUserFromSocialLogin(String userId) {
+        UserRepresentation userRepresentation = keycloakService.getById(userId);
+        if (userRepresentation == null)
+            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
+
+        try {
+            userRepository.save(toEntity(userRepresentation));
+        } catch (Exception e) {
+            log.error("Failed to save user with email='{}'. Cause: {}", userRepresentation.getEmail(), e.getMessage());
+        }
+    }
+
     @Transactional
     public void register(UserRequest request) {
         trimRequest(request);
@@ -53,6 +65,14 @@ public class AuthService {
         }
     }
 
+    public void markEmailAsVerified(UUID userId) {
+        User user = userRepository.findByIdAndStatus(userId, Status.ACTIVE)
+            .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
+
+        user.setStatus(Status.ACTIVE);
+        userRepository.save(user);
+    }
+
     public void forgotPassword(String email) {
         if (email.isEmpty())
             throw new ApiException(ResponseStatus.EMAIL_REQUIRED);
@@ -61,6 +81,15 @@ public class AuthService {
             .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
 
         keycloakService.forgotPassword(user.getId().toString());
+    }
+
+    public void updatePassword(UUID userId) {
+        // TODO: redirect user to custom frontend interface to update password
+        User user = userRepository.findByIdAndStatus(userId, Status.ACTIVE)
+            .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
+
+        user.setPassword(passwordEncoder.encode("Password updated via Keycloak UI"));
+        userRepository.save(user);
     }
 
     @Transactional
@@ -94,6 +123,7 @@ public class AuthService {
         keycloakService.resetPassword(user.getId().toString(), request.getNewPassword());
     }
 
+    @Transactional
     public void deleteById(UUID id) {
         User user = userRepository.findByIdAndStatus(id, Status.ACTIVE)
             .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
@@ -103,6 +133,7 @@ public class AuthService {
             log.error("User details are not present in the context for user with id: {}", id);
             throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
         }
+
         user.softDelete(UUID.fromString(currentUserId.get()));
         userRepository.save(user);
 

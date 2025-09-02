@@ -34,7 +34,8 @@ public class WebSecurityConfig {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PUBLIC_URLS).permitAll()
-                .requestMatchers("/api/v1/user/email/**").hasRole(Role.INTERN.name())
+                .requestMatchers("/api/v1/user/internal/**").hasRole(Role.SERVICE.name())
+                .requestMatchers("/api/v1/auth/sync/**").hasRole(Role.SERVICE.name())
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(

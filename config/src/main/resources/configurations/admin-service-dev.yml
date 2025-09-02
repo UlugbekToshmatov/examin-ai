@@ -30,3 +30,19 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8181/realms/examinai
+
+keycloak:
+  server-url: http://localhost:8181
+  realm: examinai
+  admin-service:
+    client-id: admin-service-client
+    client-secret: iCkDv9sg77qKqCUMIFTKqkS7NZLsmrb0
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+    auth-service:
+      url: http://localhost:8070

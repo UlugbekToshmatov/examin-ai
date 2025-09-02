@@ -8,12 +8,14 @@ import ai.examin.admin.model.program.entity.Program;
 import org.springframework.beans.BeanUtils;
 
 import java.util.List;
+import java.util.UUID;
 
 public class ProgramMapper {
 
-    public static Program toEntity(ProgramRequest request) {
+    public static Program toEntity(ProgramRequest request, UUID supervisorId) {
         Program program = new Program();
-        BeanUtils.copyProperties(request, program);
+        program.setName(request.name());
+        program.setSupervisorId(supervisorId);
 
         return program;
     }

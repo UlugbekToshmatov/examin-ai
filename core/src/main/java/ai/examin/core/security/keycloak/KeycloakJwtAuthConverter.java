@@ -46,7 +46,7 @@ public class KeycloakJwtAuthConverter implements Converter<Jwt, AbstractAuthenti
             }
         }
 
-        // 2) client/resource roles (for any client)
+        // 2) clients/resource roles (for any clients)
         Map<String, Object> resourceAccess = jwt.getClaim(RESOURCE_ACCESS);
         if (resourceAccess != null) {
             resourceAccess.values().forEach(val -> {

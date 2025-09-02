@@ -1,4 +1,4 @@
-package ai.examin.auth.model.keycloak.client;
+package ai.examin.auth.model.keycloak.clients;
 
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
