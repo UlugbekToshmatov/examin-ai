@@ -46,18 +46,15 @@ public class ProgramService {
         if (programRepository.existsByNameAndStatusNot(request.name(), ProgramStatus.DELETED))
             throw new ApiException(ResponseStatus.PROGRAM_ALREADY_EXISTS);
 
-        // Verify if supervisor exists in local DB
+        // Get current supervisor id
         Optional<String> currentUserId = userContextService.getCurrentUserId();
         if (currentUserId.isEmpty()) {
             log.error("User details are not present in the context for supervisor in ProgramService.create()");
             throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
         }
 
+        // Verify if supervisor exists in local DB and if supervisor's role matches with the one in Keycloak
         UserResponse supervisor = authServiceClient.getUserById(UUID.fromString(currentUserId.get()));
-        if (supervisor == null)
-            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
-
-        // Verify if supervisor's role in local DB matches with the one in Keycloak
         if (!supervisor.getRole().equals(Role.SUPERVISOR))
             throw new ApiException(ResponseStatus.ROLE_MISMATCH_EXCEPTION);
 

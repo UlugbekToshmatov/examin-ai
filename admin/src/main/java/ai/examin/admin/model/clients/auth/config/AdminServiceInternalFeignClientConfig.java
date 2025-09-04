@@ -1,6 +1,8 @@
 package ai.examin.admin.model.clients.auth.config;
 
+import ai.examin.admin.model.clients.auth.error_handler.AuthServiceErrorDecoder;
 import feign.RequestInterceptor;
+import feign.codec.ErrorDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 @RequiredArgsConstructor
 public class AdminServiceInternalFeignClientConfig {
     private final AdminServiceApiClient adminServiceApiClient;
+    private final AuthServiceErrorDecoder authServiceErrorDecoder;
 
 
     @Bean("adminServiceRequestInterceptor")
@@ -28,5 +31,10 @@ public class AdminServiceInternalFeignClientConfig {
                 throw e;
             }
         };
+    }
+
+    @Bean
+    public ErrorDecoder errorDecoder() {
+        return authServiceErrorDecoder;
     }
 }
