@@ -12,7 +12,11 @@ services:
       - rabbitmq-data:/var/lib/rabbitmq
     networks:
       - examin-ai-net
-
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   notification-postgres:
     container_name: notification-postgres
@@ -54,7 +58,7 @@ services:
       - examin-ai-net
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d auth_service_db" ]
+      test: [ "CMD-SHELL", "pg_isready -U admin -d auth_service_db -p 5433" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -78,7 +82,7 @@ services:
       - examin-ai-net
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d admin_service_db" ]
+      test: [ "CMD-SHELL", "pg_isready -U admin -d admin_service_db -p 5434" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -93,100 +97,6 @@ services:
       - "8282:80"
     networks:
       - examin-ai-net
-
-#  config-server:
-#    build:
-#      context: ./config
-#      dockerfile: Dockerfile
-#    container_name: config-server
-#    ports:
-#      - "8888:8888"
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    volumes:
-#      - ./config/configurations:/app/configurations
-#    networks:
-#      - examin-ai-net
-#
-#  discovery-service:
-#    build:
-#      context: ./discovery
-#      dockerfile: Dockerfile
-#    container_name: discovery-service
-#    ports:
-#      - "8761:8761"
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    depends_on:
-#      - config-server
-#    networks:
-#      - examin-ai-net
-#
-#  admin-service:
-#    build:
-#      context: ./admin
-#      dockerfile: Dockerfile
-#    container_name: admin-service
-#    ports:
-#      - "8050:8050"
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    depends_on:
-#      - config-server
-#      - discovery-service
-#      - admin-postgres
-#      - rabbitmq
-#    networks:
-#      - examin-ai-net
-#
-#  notification-service:
-#    build:
-#      context: ./notification
-#      dockerfile: Dockerfile
-#    container_name: notification-service
-#    ports:
-#      - "8060:8060"
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    depends_on:
-#      - config-server
-#      - discovery-service
-#      - notification-postgres
-#      - rabbitmq
-#    networks:
-#      - examin-ai-net
-#
-#  auth-service:
-#    build:
-#      context: ./auth
-#      dockerfile: Dockerfile
-#    container_name: auth-service
-#    ports:
-#      - "8070:8070"
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    depends_on:
-#      - config-server
-#      - discovery-service
-#      - auth-postgres
-#      - rabbitmq
-#    networks:
-#      - examin-ai-net
-#
-#  gateway-service:
-#    build:
-#      context: ./gateway
-#      dockerfile: Dockerfile
-#    container_name: gateway-service
-#    ports:
-#      - "8080:8080"
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    depends_on:
-#      - config-server
-#      - discovery-service
-#    networks:
-#      - examin-ai-net
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
@@ -205,11 +115,8 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin123
     ports:
       - "8181:8080"
-#    volumes:
-#      - ./auth/target/auth-0.0.1-SNAPSHOT.jar:/opt/keycloak/providers/auth.jar
     depends_on:
       - auth-postgres
-#      - auth-service
     networks:
       - examin-ai-net
 

@@ -1,9 +1,14 @@
 server:
   port: 8050
 
+eureka:
+  instance:
+    prefer-ip-address: true
+#    hostname: admin-service
+
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5434/admin_service_db
+    url: jdbc:postgresql://admin-postgres:5434/admin_service_db
     username: admin
     password: admin123
     driver-class-name: org.postgresql.Driver
@@ -29,10 +34,10 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8181/realms/examinai
+          issuer-uri: http://keycloak:8080/realms/examinai
 
 keycloak:
-  server-url: http://localhost:8181
+  server-url: http://keycloak:8080
   realm: examinai
   admin-service:
     client-id: admin-service-client
@@ -45,4 +50,4 @@ feign:
         connectTimeout: 5000
         readTimeout: 5000
     auth-service:
-      url: http://localhost:8070
+      url: http://auth-service:8070

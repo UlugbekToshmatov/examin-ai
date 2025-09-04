@@ -1,9 +1,14 @@
 server:
   port: 8060
 
+eureka:
+  instance:
+    prefer-ip-address: true
+#    hostname: notification-service
+
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/notification_service_db
+    url: jdbc:postgresql://notification-postgres:5432/notification_service_db
     username: admin
     password: admin123
     driver-class-name: org.postgresql.Driver
@@ -25,15 +30,9 @@ spring:
     drop-first: false
     contexts: development
 
-  #  security:
-  #    oauth2:
-  #      resourceserver:
-  #        jwt:
-  #          issuer-uri: http://localhost:8181/realms/examinai
-
   rabbitmq:
-    host: localhost
-    port: 5671
+    host: rabbitmq
+    port: 5672
     username: admin
     password: admin123
     auth:
@@ -58,6 +57,12 @@ spring:
           auth: true
           starttls:
             enable: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/examinai
 
 feign:
   client:

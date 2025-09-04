@@ -1,0 +1,255 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: examin-ai-rabbitmq
+    ports:
+      - "5671:5672"
+      - "15671:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - examin-ai-net
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  notification-postgres:
+    container_name: notification-postgres
+    image: postgres
+    environment:
+      POSTGRES_DB: notification_service_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - notification-postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - examin-ai-net
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d notification_service_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth-postgres:
+    container_name: auth-postgres
+    image: postgres
+    environment:
+      POSTGRES_DB: auth_service_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - auth-postgres:/var/lib/postgresql/data
+    ports:
+      - "5433:5433"
+    expose:
+      - 5433
+    command: -p 5433
+    networks:
+      - examin-ai-net
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d auth_service_db -p 5433" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  admin-postgres:
+    container_name: admin-postgres
+    image: postgres
+    environment:
+      POSTGRES_DB: admin_service_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - admin-postgres:/var/lib/postgresql/data
+    ports:
+      - "5434:5434"
+    expose:
+      - 5434
+    command: -p 5434
+    networks:
+      - examin-ai-net
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d admin_service_db -p 5434" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "example@mail.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin123"
+    ports:
+      - "8282:80"
+    networks:
+      - examin-ai-net
+
+  config-server:
+    build:
+      context: ./config
+      dockerfile: Dockerfile
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_PROFILES_ACTIVE: native
+    volumes:
+      - ./config/src/main/resources/configurations:/app/configurations
+    networks:
+      - examin-ai-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  discovery-service:
+    build:
+      context: ./discovery
+      dockerfile: Dockerfile
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      config-server:
+        condition: service_healthy
+    networks:
+      - examin-ai-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  admin-service:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: admin-service
+    ports:
+      - "8050:8050"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      admin-postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - examin-ai-net
+
+  notification-service:
+    build:
+      context: ./notification
+      dockerfile: Dockerfile
+    container_name: notification-service
+    ports:
+      - "8060:8060"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      notification-postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - examin-ai-net
+
+  auth-service:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8070:8070"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      auth-postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - examin-ai-net
+
+  gateway-service:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    networks:
+      - examin-ai-net
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    command: start-dev
+    restart: unless-stopped
+    environment:
+      KC_DB: postgres
+      # KC_DB_URL_HOST: auth-postgres
+      # KC_DB_PORT: 5433
+      # KC_DB_DATABASE: auth_service_db
+      KC_DB_URL: jdbc:postgresql://auth-postgres:5433/auth_service_db
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: admin123
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+    ports:
+      - "8181:8080"
+#    volumes:
+#      - ./keycloak-providers:/opt/keycloak/providers
+    depends_on:
+      - auth-postgres
+#      - auth-service
+    networks:
+      - examin-ai-net
+
+
+volumes:
+  rabbitmq-data:
+  notification-postgres:
+  auth-postgres:
+  admin-postgres:
+
+networks:
+  examin-ai-net:
+    driver: bridge

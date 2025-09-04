@@ -4,7 +4,7 @@ FROM openjdk:17
 WORKDIR /app
 
 # Copy the built JAR file
-COPY target/*.jar app.jar
+COPY target/auth-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose the port
 EXPOSE 8070

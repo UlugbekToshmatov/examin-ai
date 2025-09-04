@@ -1,9 +1,14 @@
 server:
   port: 8070
 
+eureka:
+  instance:
+    prefer-ip-address: true
+#    hostname: auth-service
+
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/auth_service_db
+    url: jdbc:postgresql://auth-postgres:5433/auth_service_db
     username: admin
     password: admin123
     driver-class-name: org.postgresql.Driver
@@ -32,8 +37,8 @@ spring:
           issuer-uri: ${keycloak.server-url}/realms/${keycloak.realm}
 
   rabbitmq:
-    host: localhost
-    port: 5671
+    host: rabbitmq
+    port: 5672
     username: admin
     password: admin123
     auth:
@@ -43,7 +48,7 @@ spring:
       route: auth_route
 
 keycloak:
-  server-url: http://localhost:8181
+  server-url: http://keycloak:8080
   realm: examinai
   admin:
     client-id: examinai-admin-api
@@ -54,4 +59,4 @@ keycloak:
   user:
     sync:
       webhook:
-        url: http://localhost:8080/api/v1/auth/sync/user-event
+        url: http://gateway-service:8080/api/v1/auth/sync/user-event
