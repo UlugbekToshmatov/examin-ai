@@ -87,16 +87,16 @@ services:
       timeout: 5s
       retries: 5
 
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "example@mail.com"
-      PGADMIN_DEFAULT_PASSWORD: "admin123"
-    ports:
-      - "8282:80"
-    networks:
-      - examin-ai-net
+#  pgadmin:
+#    container_name: pgadmin
+#    image: dpage/pgadmin4
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: "example@mail.com"
+#      PGADMIN_DEFAULT_PASSWORD: "admin123"
+#    ports:
+#      - "8282:80"
+#    networks:
+#      - examin-ai-net
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
@@ -113,12 +113,21 @@ services:
       KC_DB_PASSWORD: admin123
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin123
+      KC_HOSTNAME: localhost
+      KC_HTTP_PORT: 8181
+      JAVA_OPTS: >
+        -Duser.sync.webhook.url=http://host.docker.internal:8070/api/v1/auth/sync/user-event
+        -Dkeycloak.server-url=http://localhost:8181
     ports:
-      - "8181:8080"
+      - "8181:8181"
+    volumes:
+      - ./keycloak-providers:/opt/keycloak/providers
     depends_on:
       - auth-postgres
     networks:
       - examin-ai-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 
 volumes:

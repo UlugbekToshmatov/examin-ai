@@ -50,8 +50,9 @@ keycloak:
     client-secret: MCVgeMd5w2Sy9r1xr2tHikLoCOROpBS4
   auth-service:
     client-id: auth-service-client
-    client-secret: BecDB2enoNJ7pclu1czeKji0Smy7nwJD
-  user:
-    sync:
-      webhook:
-        url: http://localhost:8080/api/v1/auth/sync/user-event
+    client-secret: Q2wdvNAlXLxtj0hlvDmi4Kvwl9ljI3BJ
+
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
+#    org.springframework.web: DEBUG

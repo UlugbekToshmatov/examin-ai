@@ -92,10 +92,7 @@ public class KeycloakService {
     }
 
     public UserRepresentation getById(String userId) {
-        return getUsersResource().search(userId, 1, 1, TRUE)
-            .stream()
-            .findFirst()
-            .orElse(null);
+        return getUsersResource().get(userId).toRepresentation();
     }
 
     private UserRepresentation getUserByUsername(String username) {

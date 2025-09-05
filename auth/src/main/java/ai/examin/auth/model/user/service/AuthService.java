@@ -32,16 +32,12 @@ public class AuthService {
     private final UserContextService userContextService;
 
 
-    public void syncUserFromSocialLogin(String userId) {
-        UserRepresentation userRepresentation = keycloakService.getById(userId);
-        if (userRepresentation == null)
-            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
+    public void syncUserFromRegistration(String userId) {
+        syncUserFromKeycloak(userId);
+    }
 
-        try {
-            userRepository.save(toEntity(userRepresentation));
-        } catch (Exception e) {
-            log.error("Failed to save user with email='{}'. Cause: {}", userRepresentation.getEmail(), e.getMessage());
-        }
+    public void syncUserFromSocialLogin(String userId) {
+        syncUserFromKeycloak(userId);
     }
 
     @Transactional
@@ -66,11 +62,14 @@ public class AuthService {
     }
 
     public void markEmailAsVerified(UUID userId) {
-        User user = userRepository.findByIdAndStatus(userId, Status.ACTIVE)
+        User user = userRepository.findById(userId)
             .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
 
-        user.setStatus(Status.ACTIVE);
-        userRepository.save(user);
+        if (user.getStatus() != Status.ACTIVE) {
+            log.info("Updating user status from {} to ACTIVE for user with id: {}", user.getStatus(), user.getId());
+            user.setStatus(Status.ACTIVE);
+            userRepository.save(user);
+        }
     }
 
     public void forgotPassword(String email) {
@@ -140,85 +139,25 @@ public class AuthService {
         keycloakService.deleteUser(user.getId().toString());
     }
 
-//    @Transactional
-//    public void confirmEmail(String jwtToken) {
-//        if (jwtToken == null)
-//            throw new ApiException(ResponseStatus.TOKEN_REQUIRED);
-//
-//        String username = jwtProvider.extractUsernameFromToken(jwtToken);
-//
-//        if (username == null) {
-//            tokenRepository.findByJwtTokenAndTypeAndRevokedFalseAndExpiredFalse(jwtToken, TokenType.ACCOUNT_VERIFICATION_TOKEN)
-//                .ifPresent(token -> {
-//                    token.setRevoked(true);
-//                    tokenRepository.save(token);
-//                });
-//
-//            throw new ApiException(ResponseStatus.INVALID_TOKEN);
-//        }
-//
-//        if (jwtProvider.isTokenExpired(jwtToken)) {
-//            tokenRepository.findByJwtTokenAndTypeAndRevokedFalseAndExpiredFalse(jwtToken, TokenType.ACCOUNT_VERIFICATION_TOKEN)
-//                .ifPresent(token -> {
-//                    token.setExpired(true);
-//                    tokenRepository.save(token);
-//                });
-//
-//            throw new ApiException(ResponseStatus.TOKEN_EXPIRED);
-//        }
-//
-//        Token token = tokenRepository.findByJwtTokenAndType(jwtToken, TokenType.ACCOUNT_VERIFICATION_TOKEN)
-//            .orElseThrow(() -> new ApiException(ResponseStatus.TOKEN_NOT_FOUND));
-//
-//        if (token.getExpired() || token.getRevoked())
-//            throw new ApiException(ResponseStatus.TOKEN_EXPIRED);
-//
-//        User user = token.getUser();
-//
-//        if (!username.equals(user.getEmail()))
-//            throw new ApiException(ResponseStatus.TOKEN_MISMATCH_EXCEPTION);
-//
-//        token.setRevoked(true);
-//        tokenRepository.save(token);
-//
-//        user.setStatus(Status.ACTIVE);
-//        userRepository.save(user);
-//    }
-//
-//    public LoginResponse login(LoginRequest request) {
-//        User user = userRepository.findByEmail(request.email().trim().toLowerCase())
-//            .orElseThrow(() -> new ApiException(ResponseStatus.EMAIL_OR_USERNAME_NOT_REGISTERED));
-//
-//        if (user.getStatus() == Status.PENDING_VERIFICATION)
-//            throw new ApiException(ResponseStatus.EMAIL_CONFIRMATION_REQUIRED);
-//
-//        if (!passwordEncoder.matches(request.password(), user.getPassword()))
-//            throw new ApiException(ResponseStatus.INCORRECT_PASSWORD);
-//
-//        List<Token> currentTokens = tokenRepository.findAllByUserAndTypeInAndRevokedFalseAndExpiredFalse(
-//            user, List.of(TokenType.ACCESS_TOKEN, TokenType.REFRESH_TOKEN)
-//        );
-//        if (!currentTokens.isEmpty()) {
-//            List<Token> revokedTokens = new LinkedList<>();
-//            currentTokens.forEach(token -> {
-//                token.setRevoked(true);
-//                revokedTokens.add(token);
-//            });
-//            tokenRepository.saveAll(revokedTokens);
-//        }
-//
-//        UserPrincipal userPrincipal = new UserPrincipal(UserMapper.getUserPayload(user));
-//        String accessToken = jwtProvider.generateToken(userPrincipal, TokenType.ACCESS_TOKEN);
-//        String refreshToken = jwtProvider.generateToken(userPrincipal, TokenType.REFRESH_TOKEN);
-//
-//        List<Token> tokens = new LinkedList<>();
-//        tokens.add(TokenMapper.toToken(user, accessToken, TokenType.ACCESS_TOKEN));
-//        tokens.add(TokenMapper.toToken(user, refreshToken, TokenType.REFRESH_TOKEN));
-//        tokenRepository.saveAll(tokens);
-//
-//        LoginResponse loginResponse = new LoginResponse(user, accessToken, refreshToken);
-//        log.info("Login response: {}", loginResponse);
-//
-//        return loginResponse;
-//    }
+    private void syncUserFromKeycloak(String userId) {
+        log.info("Syncing user data with id: {}", userId);
+        try {
+            // Wait for the user to be created in Keycloak
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            log.error("Failed to sleep", e);
+        }
+
+        UserRepresentation userRepresentation = keycloakService.getById(userId);
+        if (userRepresentation == null) {
+            log.error("User with id: '{}' not found in Keycloak", userId);
+            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
+        }
+
+        try {
+            userRepository.save(toEntity(userRepresentation));
+        } catch (Exception e) {
+            log.error("Failed to save user with email='{}'. Cause: {}", userRepresentation.getEmail(), e.getMessage());
+        }
+    }
 }

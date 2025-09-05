@@ -42,6 +42,7 @@ public class UserMapper {
             newUser.setStatus(Status.ACTIVE);
         else
             newUser.setStatus(Status.PENDING_VERIFICATION);
+        newUser.setRole(Role.INTERN);
 
         return newUser;
     }

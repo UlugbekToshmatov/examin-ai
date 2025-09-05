@@ -28,6 +28,8 @@ public class KeycloakSyncController {
         try {
             switch (event.getEventType()) {
                 case "USER_REGISTERED":
+                    authService.syncUserFromRegistration(event.getUserId());
+                    break;
                 case "SOCIAL_LOGIN":
                     authService.syncUserFromSocialLogin(event.getUserId());
                     break;
@@ -36,6 +38,9 @@ public class KeycloakSyncController {
                     break;
                 case "PASSWORD_UPDATED":
                     authService.updatePassword(UUID.fromString(event.getUserId()));
+                    break;
+                case "USER_DELETED_ADMIN":
+                    authService.deleteById(UUID.fromString(event.getUserId()));
                     break;
             }
             return ResponseEntity.ok().build();
