@@ -3,7 +3,6 @@ package ai.examin.admin.model.program.controller;
 import ai.examin.admin.model.program.dto.ProgramRequest;
 import ai.examin.admin.model.program.dto.ProgramResponse;
 import ai.examin.admin.model.program.dto.ProgramResponseMin;
-import ai.examin.admin.model.program.dto.ProgramUpdateRequest;
 import ai.examin.admin.model.program.service.ProgramService;
 import ai.examin.core.base_classes.HttpResponse;
 import ai.examin.core.enums.ResponseStatus;
@@ -63,7 +62,7 @@ public class ProgramController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HttpResponse> update(@PathVariable Long id, @RequestBody @Valid ProgramUpdateRequest request) {
+    public ResponseEntity<HttpResponse> update(@PathVariable Long id, @RequestBody @Valid ProgramRequest request) {
         ProgramResponse program = programService.updateById(id, request);
 
         return ResponseEntity.ok(

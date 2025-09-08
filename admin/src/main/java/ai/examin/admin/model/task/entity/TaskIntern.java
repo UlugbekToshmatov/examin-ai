@@ -12,7 +12,7 @@ import java.util.UUID;
 @ToString
 @Getter
 @Setter
-@Table(name = "task_interns", uniqueConstraints = {@UniqueConstraint(columnNames = {"task_id", "intern_id"})})
+@Table(name = "tasks_interns", uniqueConstraints = {@UniqueConstraint(columnNames = {"task_id", "intern_id"})})
 @Entity
 public class TaskIntern extends BaseEntity {
     @Id

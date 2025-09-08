@@ -1,5 +1,5 @@
 package ai.examin.core.enums;
 
 public enum ProgramStatus {
-    CREATED, APPROVED, FINISHED, DELETED
+    ACTIVE, PENDING_APPROVAL, FINISHED, ENDED, DELETED
 }

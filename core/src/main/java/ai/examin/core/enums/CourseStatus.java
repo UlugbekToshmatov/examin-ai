@@ -1,5 +1,5 @@
 package ai.examin.core.enums;
 
 public enum CourseStatus {
-    CREATED, APPROVED, FINISHED, DELETED
+    ACTIVE, PENDING_APPROVAL, APPROVED, FINISHED, ENDED, DELETED
 }

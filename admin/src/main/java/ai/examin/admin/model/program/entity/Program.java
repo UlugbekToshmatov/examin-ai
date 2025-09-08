@@ -27,12 +27,15 @@ public class Program extends BaseEntity {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @Column(name = "supervisor_id", nullable = false)
-    private UUID supervisorId;
+    @Column(name = "description", nullable = false)
+    private String description;
+
+    @Column(name = "expert_id", nullable = false)
+    private UUID expertId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'CREATED'")
-    private ProgramStatus status = ProgramStatus.CREATED;
+    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'ACTIVE'")
+    private ProgramStatus status = ProgramStatus.ACTIVE;
 
 
     @Override

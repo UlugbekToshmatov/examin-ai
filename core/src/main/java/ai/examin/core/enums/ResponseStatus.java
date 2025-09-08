@@ -24,6 +24,7 @@ public enum ResponseStatus {
     UNAUTHORIZED(14, HttpStatus.UNAUTHORIZED, "Authentication failed or token expired"),
     FORBIDDEN(15, HttpStatus.FORBIDDEN, "You do not have enough permissions to access this resource"),
     RESOURCE_NOT_FOUND(16, HttpStatus.NOT_FOUND, "Resource not found"),
+    ROLE_MISMATCH_EXCEPTION(17, HttpStatus.INTERNAL_SERVER_ERROR, "Your roles in the system do not match"),
     USER_NOT_FOUND(100, HttpStatus.NOT_FOUND, "User not found"),
     EMAIL_ALREADY_REGISTERED(101, HttpStatus.BAD_REQUEST, "This email is already registered"),
     USERNAME_ALREADY_REGISTERED(102, HttpStatus.BAD_REQUEST, "This username is already registered"),
@@ -46,7 +47,8 @@ public enum ResponseStatus {
     TASK_ALREADY_EXISTS(305, HttpStatus.BAD_REQUEST, "Task with this name already exists in this program"),
     TASK_NOT_FOUND(306, HttpStatus.NOT_FOUND, "Task not found"),
     MENTOR_ID_REQUIRED(307, HttpStatus.BAD_REQUEST, "Mentor ID is required"),
-    ROLE_MISMATCH_EXCEPTION(308, HttpStatus.INTERNAL_SERVER_ERROR, "Your roles in the system do not match");
+    ALPHA_NUMERIC_VALUE_REQUIRED(308, HttpStatus.BAD_REQUEST, "Name or title must contain only letters and numbers"),
+    SPECIALIST_NOT_FOUND(309, HttpStatus.NOT_FOUND, "Specialist not found");
 
 
     private final Integer statusCode;

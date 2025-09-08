@@ -28,7 +28,7 @@ public class Task extends BaseEntity {
     private Course course;
 
     @Column(name = "mentor_id", nullable = false)
-    private UUID mentorId;
+    private UUID mentorId;  // TODO: remove mentorId
 
     @Column(name = "title", nullable = false)
     private String title;

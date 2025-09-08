@@ -13,10 +13,12 @@ import lombok.Setter;
 public class ProgramResponseMin {
     private Long id;
     private String name;
+    private String description;
 
 
     public ProgramResponseMin(Program program) {
         this.id = program.getId();
         this.name = program.getName();
+        this.description = program.getDescription();
     }
 }

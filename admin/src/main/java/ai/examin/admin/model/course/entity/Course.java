@@ -34,10 +34,10 @@ public class Course extends BaseEntity {
     private Program program;
 
     @Column(name = "expert_id", nullable = false)
-    private UUID expertId;
+    private UUID expertId;  // TODO: mentorId
 
-    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'CREATED'")
-    private CourseStatus status = CourseStatus.CREATED;
+    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'PENDING_APPROVAL'")
+    private CourseStatus status = CourseStatus.PENDING_APPROVAL;
 
 
     @Override

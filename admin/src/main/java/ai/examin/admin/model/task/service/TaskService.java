@@ -153,7 +153,7 @@ public class TaskService {
             throw new ApiException(ResponseStatus.USER_NOT_FOUND);
 
         if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.SUPERVISOR.name())) {
-            if (!task.getCourse().getProgram().getSupervisorId().equals(currentUser.getId()))
+            if (!task.getCourse().getProgram().getExpertId().equals(currentUser.getId()))
                 throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
         } else if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.EXPERT.name())) {
             if (!task.getCourse().getExpertId().equals(currentUser.getId()))

@@ -13,10 +13,12 @@ import lombok.Setter;
 public class CourseResponseMin {
     private Long id;
     private String name;
+    private String description;
 
 
     public CourseResponseMin(Course course) {
         this.id = course.getId();
         this.name = course.getName();
+        this.description = course.getDescription();
     }
 }

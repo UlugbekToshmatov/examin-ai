@@ -1,6 +1,9 @@
 package ai.examin.admin.model.course.controller;
 
-import ai.examin.admin.model.course.dto.*;
+import ai.examin.admin.model.course.dto.CourseRequest;
+import ai.examin.admin.model.course.dto.CourseResponse;
+import ai.examin.admin.model.course.dto.CourseResponseMin;
+import ai.examin.admin.model.course.dto.CourseUpdateRequest;
 import ai.examin.admin.model.course.service.CourseService;
 import ai.examin.core.base_classes.HttpResponse;
 import ai.examin.core.enums.ResponseStatus;
@@ -8,7 +11,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -60,7 +62,6 @@ public class CourseController {
         );
     }
 
-    @PreAuthorize(value = "hasRole('SUPERVISOR')")
     @PutMapping("/{id}")
     public ResponseEntity<HttpResponse> update(@PathVariable Long id, @RequestBody @Valid CourseUpdateRequest request) {
         CourseResponse course = courseService.updateById(id, request);
@@ -74,34 +75,19 @@ public class CourseController {
         );
     }
 
-    @PutMapping("/name/{id}")
-    public ResponseEntity<HttpResponse> updateName(
-        @PathVariable Long id, @RequestBody @Valid CourseUpdateNameRequest request
-    ) {
-        CourseResponse course = courseService.updateName(id, request);
-
-        return ResponseEntity.ok(
-            HttpResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .description(HttpStatus.OK.name())
-                .data(Map.of("course", course))
-                .build()
-        );
-    }
-
-    @PreAuthorize(value = "hasRole('SUPERVISOR')")
-    @PutMapping("/approve/{id}")
-    public ResponseEntity<HttpResponse> approveCourse(@PathVariable Long id) {
-        CourseResponse course = courseService.approveCourse(id);
-
-        return ResponseEntity.ok(
-            HttpResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .description(HttpStatus.OK.name())
-                .data(Map.of("course", course))
-                .build()
-        );
-    }
+//    @PreAuthorize(value = "hasRole('SUPERVISOR')")
+//    @PutMapping("/approve/{id}")
+//    public ResponseEntity<HttpResponse> approveCourse(@PathVariable Long id) {
+//        CourseResponse course = courseService.approveCourse(id);
+//
+//        return ResponseEntity.ok(
+//            HttpResponse.builder()
+//                .statusCode(HttpStatus.OK.value())
+//                .description(HttpStatus.OK.name())
+//                .data(Map.of("course", course))
+//                .build()
+//        );
+//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpResponse> delete(@PathVariable Long id) {
