@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/program")
+@RequestMapping("/api/v1/admin/program")
 @RequiredArgsConstructor
 public class ProgramController {
     private final ProgramService programService;

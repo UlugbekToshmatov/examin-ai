@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static ai.examin.admin.model.program.mapper.ProgramExpertMapper.toEntity;
@@ -38,7 +39,17 @@ public class ProgramExpertService {
         if (!expert.getRole().equals(Role.EXPERT))
             throw new ApiException(ResponseStatus.ROLE_MISMATCH_EXCEPTION);
 
-        programExpertRepository.saveAndFlush(toEntity(program, expert));
+        Optional<ProgramExpert> optionalProgramExpert = programExpertRepository.findByProgram_IdAndExpertId(programId, expertId);
+        if (optionalProgramExpert.isEmpty()) {
+            programExpertRepository.saveAndFlush(toEntity(program, expert));
+        } else {
+            ProgramExpert programExpert = optionalProgramExpert.get();
+            if (programExpert.getStatus().equals(SpecialistProgramStatus.ASSIGNED))
+                throw new ApiException(ResponseStatus.SPECIALIST_ALREADY_ASSIGNED);
+
+            programExpert.setStatus(SpecialistProgramStatus.ASSIGNED);
+            programExpertRepository.saveAndFlush(programExpert);
+        }
 
         return toResponse(program, programExpertRepository.findAllByProgramId(program.getId()));
     }
@@ -48,8 +59,11 @@ public class ProgramExpertService {
             .orElseThrow(() -> new ApiException(ResponseStatus.PROGRAM_NOT_FOUND));
 
         ProgramExpert programExpert = programExpertRepository
-            .findByProgram_IdAndExpertIdAndStatus(program.getId(), expertId, SpecialistProgramStatus.ASSIGNED)
+            .findByProgram_IdAndExpertId(program.getId(), expertId)
             .orElseThrow(() -> new ApiException(ResponseStatus.SPECIALIST_NOT_FOUND));
+
+        if (programExpert.getStatus().equals(SpecialistProgramStatus.UNASSIGNED))
+            throw new ApiException(ResponseStatus.SPECIALIST_ALREADY_UNASSIGNED);
 
         programExpert.setStatus(SpecialistProgramStatus.UNASSIGNED);
         programExpertRepository.saveAndFlush(programExpert);

@@ -11,9 +11,7 @@ import ai.examin.admin.model.course.repository.CourseRepository;
 import ai.examin.admin.model.program.entity.Program;
 import ai.examin.admin.model.program.repository.ProgramExpertRepository;
 import ai.examin.admin.model.program.repository.ProgramRepository;
-import ai.examin.core.enums.ProgramStatus;
-import ai.examin.core.enums.ResponseStatus;
-import ai.examin.core.enums.Role;
+import ai.examin.core.enums.*;
 import ai.examin.core.exception_handler.ApiException;
 import ai.examin.core.utils.UserContextService;
 import lombok.RequiredArgsConstructor;
@@ -68,9 +66,13 @@ public class CourseService {
             throw new ApiException(ResponseStatus.COURSE_ALREADY_EXISTS);
 
         Course course;
-        if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.SUPERVISOR.name()))
+        if (userContextService.getCurrentUserRoles().contains(Role.SUPERVISOR.name()))
             course = courseRepository.save(toEntity(request, program, TRUE));
         else {
+            // Check if expert is assigned to the program
+            if (!programExpertRepository.existsByProgramAndExpertIdAndStatus(program, getCurrentUserId(), ASSIGNED))
+                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
+
             course = courseRepository.save(toEntity(request, program, FALSE));
             // TODO: send approval request to supervisor to create course
         }
@@ -85,18 +87,12 @@ public class CourseService {
         if (courseRepository.existsByProgramAndNameAndStatusNot(course.getProgram(), request.name(), DELETED))
             throw new ApiException(ResponseStatus.COURSE_ALREADY_EXISTS);
 
-        Optional<String> currentUserId = userContextService.getCurrentUserId();
-        if (currentUserId.isEmpty()) {
-            log.error("User details are not present in the context in CourseService.updateName()");
-            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
-        }
-
-        if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.SUPERVISOR.name())) {
+        if (userContextService.getCurrentUserRoles().contains(Role.SUPERVISOR.name())) {
             update(request, course);
             courseRepository.saveAndFlush(course);
         } else {
-            UUID expertId = UUID.fromString(currentUserId.get());
-            if (!programExpertRepository.existsByProgramAndExpertIdAndStatus(course.getProgram(), expertId, ASSIGNED))
+            // Check if expert is assigned to the program
+            if (!programExpertRepository.existsByProgramAndExpertIdAndStatus(course.getProgram(), getCurrentUserId(), ASSIGNED))
                 throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
 
             // TODO: send approval request to supervisor to update course details
@@ -134,18 +130,12 @@ public class CourseService {
         Course course = courseRepository.findByIdAndStatusNot(id, DELETED)
             .orElseThrow(() -> new ApiException(ResponseStatus.COURSE_NOT_FOUND));
 
-        Optional<String> currentUserId = userContextService.getCurrentUserId();
-        if (currentUserId.isEmpty()) {
-            log.error("User details are not present in the context in CourseService.updateName()");
-            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
-        }
-
-        UUID currentUserUuid = UUID.fromString(currentUserId.get());
-        if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.SUPERVISOR.name())) {
-            course.softDelete(currentUserUuid);
+        UUID currentUserId = getCurrentUserId();
+        if (userContextService.getCurrentUserRoles().contains(Role.SUPERVISOR.name())) {
+            course.softDelete(currentUserId);
             courseRepository.saveAndFlush(course);
         } else {
-            if (!programExpertRepository.existsByProgramAndExpertIdAndStatus(course.getProgram(), currentUserUuid, ASSIGNED))
+            if (!programExpertRepository.existsByProgramAndExpertIdAndStatus(course.getProgram(), currentUserId, ASSIGNED))
                 throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
 
             // TODO: send approval request to supervisor to delete course
@@ -153,5 +143,15 @@ public class CourseService {
 
         // Delete all tasks associated with the course
         // taskService.deleteAllByCourseId(id);
+    }
+
+    private UUID getCurrentUserId() {
+        Optional<String> currentUserId = userContextService.getCurrentUserId();
+        if (currentUserId.isEmpty()) {
+            log.error("User details are not present in the context in CourseService.getCurrentUserId()");
+            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
+        }
+
+        return UUID.fromString(currentUserId.get());
     }
 }

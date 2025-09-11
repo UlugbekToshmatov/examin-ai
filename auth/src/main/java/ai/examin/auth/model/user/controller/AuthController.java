@@ -59,17 +59,4 @@ public class AuthController {
                 .build()
         );
     }
-
-    @DeleteMapping()
-    public HttpEntity<HttpResponse> deleteAccount(@RequestParam UUID id) {
-        authService.deleteById(id);
-
-        return ResponseEntity.ok(
-            HttpResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .description(HttpStatus.OK.name())
-                .data("Account has been deleted successfully.")
-                .build()
-        );
-    }
 }

@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/course-mentor")
+@RequestMapping("/api/v1/admin/course-mentor")
 @RequiredArgsConstructor
 public class CourseMentorController {
     private final CourseMentorService courseMentorService;

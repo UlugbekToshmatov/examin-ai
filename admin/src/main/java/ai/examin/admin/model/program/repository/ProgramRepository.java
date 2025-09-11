@@ -10,7 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface ProgramRepository extends JpaRepository<Program, Long> {
-    Boolean existsByNameAndStatus(String name, ProgramStatus status);
     Boolean existsByNameAndStatusNot(String name, ProgramStatus status);
     Optional<Program> findByIdAndStatusNot(Long id, ProgramStatus status);
     List<Program> findAllByStatusNot(ProgramStatus courseStatus);

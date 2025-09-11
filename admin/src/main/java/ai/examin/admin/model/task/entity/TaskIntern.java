@@ -1,10 +1,11 @@
 package ai.examin.admin.model.task.entity;
 
 import ai.examin.core.base_classes.BaseEntity;
+import ai.examin.core.enums.SpecialistProgramStatus;
+import ai.examin.core.enums.TaskInternStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -27,8 +28,22 @@ public class TaskIntern extends BaseEntity {
     @Column(name = "intern_id", nullable = false)
     private UUID internId;
 
+    @Column(name = "intern_full_name", nullable = false)
+    private String internFullName;
+
+    @Column(name = "intern_email", nullable = false)
+    private String internEmail;
+
     @Column(name = "github_link", nullable = false, columnDefinition = "VARCHAR(500) DEFAULT 'NOT SUBMITTED'")
     private String githubLink;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "task_status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'IN_PROGRESS'")
+    private TaskInternStatus taskStatus = TaskInternStatus.IN_PROGRESS;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'ASSIGNED'")
+    private SpecialistProgramStatus status = SpecialistProgramStatus.ASSIGNED;
 
 
     @Override

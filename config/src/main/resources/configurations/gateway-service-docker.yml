@@ -36,7 +36,7 @@ spring:
         - id: admin-service
           uri: lb://admin-service
           predicates:
-            - Path=/api/v1/course/**, /api/v1/program/**, /api/v1/task/**
+            - Path=/api/v1/admin/profile/**, /api/v1/admin/program/**, /api/v1/admin/course/**, /api/v1/admin/task/**, /api/v1/admin/program-expert/**, /api/v1/admin/course-mentor/**, /api/v1/admin/task-intern/**
           filters:
             - RemoveRequestHeader=Cookie
             - AddRequestHeader=Authorization, Bearer

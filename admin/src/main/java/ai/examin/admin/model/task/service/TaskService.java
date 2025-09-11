@@ -1,29 +1,35 @@
 package ai.examin.admin.model.task.service;
 
-import ai.examin.admin.model.clients.auth.AuthClient;
-import ai.examin.admin.model.clients.auth.dto.UserResponse;
 import ai.examin.admin.model.course.entity.Course;
+import ai.examin.admin.model.course.entity.CourseMentor;
+import ai.examin.admin.model.course.mapper.CourseMentorMapper;
+import ai.examin.admin.model.course.repository.CourseMentorRepository;
 import ai.examin.admin.model.course.repository.CourseRepository;
-import ai.examin.admin.model.task.dto.*;
+import ai.examin.admin.model.program.repository.ProgramExpertRepository;
+import ai.examin.admin.model.task.dto.TaskRequest;
+import ai.examin.admin.model.task.dto.TaskResponse;
+import ai.examin.admin.model.task.dto.TaskResponseMin;
+import ai.examin.admin.model.task.dto.TaskUpdateRequest;
 import ai.examin.admin.model.task.entity.Task;
+import ai.examin.admin.model.task.entity.TaskIntern;
 import ai.examin.admin.model.task.repository.TaskInternRepository;
 import ai.examin.admin.model.task.repository.TaskRepository;
-import ai.examin.core.enums.CourseStatus;
-import ai.examin.core.enums.ResponseStatus;
-import ai.examin.core.enums.Role;
-import ai.examin.core.enums.TaskStatus;
+import ai.examin.core.enums.*;
 import ai.examin.core.exception_handler.ApiException;
+import ai.examin.core.security.UserContext;
 import ai.examin.core.utils.UserContextService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import static ai.examin.admin.model.task.mapper.TaskMapper.*;
+import static ai.examin.core.enums.SpecialistProgramStatus.ASSIGNED;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 @Slf4j
 @Service
@@ -32,8 +38,9 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final TaskInternRepository taskInternRepository;
     private final CourseRepository courseRepository;
+    private final CourseMentorRepository courseMentorRepository;
+    private final ProgramExpertRepository programExpertRepository;
     private final UserContextService userContextService;
-    private final AuthClient authClient;
 
 
     public List<TaskResponseMin> getAll() {
@@ -45,10 +52,17 @@ public class TaskService {
     }
 
     public TaskResponse getById(Long id) {
-        return toResponse(taskRepository.findByIdAndStatusNot(id, TaskStatus.DELETED)
-            .orElseThrow(() -> new ApiException(ResponseStatus.TASK_NOT_FOUND)));
+        Task task = taskRepository.findByIdAndStatusNot(id, TaskStatus.DELETED)
+            .orElseThrow(() -> new ApiException(ResponseStatus.TASK_NOT_FOUND));
+
+        Course course = task.getCourse();
+        List<CourseMentor> mentors = courseMentorRepository.findAllByCourseId(course.getId());
+        List<TaskIntern> interns = taskInternRepository.findAllByTaskId(task.getId());
+
+        return toResponse(task, course, mentors, interns);
     }
 
+    @Transactional
     public TaskResponse create(TaskRequest request) {
         Course course = courseRepository.findByIdAndStatusNot(request.courseId(), CourseStatus.DELETED)
             .orElseThrow(() -> new ApiException(ResponseStatus.COURSE_NOT_FOUND));
@@ -56,39 +70,28 @@ public class TaskService {
         if (taskRepository.existsByCourse_IdAndTitleAndStatusNot(request.courseId(), request.title(), TaskStatus.DELETED))
             throw new ApiException(ResponseStatus.TASK_ALREADY_EXISTS);
 
-        Task task;
+        UserContext currentUser = getCurrentUser();
 
-        if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.SUPERVISOR.name())
-        || userContextService.getCurrentUserRoles().contains("ROLE_" + Role.EXPERT.name())) {
-            if (request.mentorId() == null)
-                throw new ApiException(ResponseStatus.MENTOR_ID_REQUIRED);
+        if (currentUser.getRoles().contains("ROLE_" + Role.SUPERVISOR.name())) {
+            Task task = taskRepository.save(toEntity(request, course, FALSE));
+            return toResponse(task, course, List.of(), List.of());
+        } else if (currentUser.getRoles().contains("ROLE_" + Role.EXPERT.name())) {
+            // Check if expert is assigned to the program
+            if (!programExpertRepository.existsByProgramAndExpertIdAndStatus(course.getProgram(), currentUser.getId(), SpecialistProgramStatus.ASSIGNED))
+                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
 
-            // Verify if mentor exists in local DB
-            UserResponse mentor = authClient.getUserByIdInternal(request.mentorId());
-            if (mentor == null)
-                throw new ApiException(ResponseStatus.USER_NOT_FOUND);
-
-            // Verify if mentor's role in local DB matches with the one in Keycloak
-            if (!mentor.getRole().equals(Role.MENTOR))
-                throw new ApiException(ResponseStatus.ROLE_MISMATCH_EXCEPTION);
-
-            task = taskRepository.save(toEntity(request, course));
+            Task task = taskRepository.save(toEntity(request, course, FALSE));
+            return toResponse(task, course, List.of(), List.of());
         } else {
-            Optional<String> currentUserId = userContextService.getCurrentUserId();
-            if (currentUserId.isEmpty()) {
-                log.error("User details are not present in the context for mentor in TaskService.create()");
-                throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
-            }
+            // Check if mentor is assigned to the course
+            if (!courseMentorRepository.existsByCourseAndMentorIdAndStatus(course, currentUser.getId(), SpecialistProgramStatus.ASSIGNED))
+                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
 
-            // Verify if mentor exists in local DB
-            UserResponse mentor = authClient.getUserByIdInternal(UUID.fromString(currentUserId.get()));
-            if (mentor == null)
-                throw new ApiException(ResponseStatus.USER_NOT_FOUND);
-
-            task = taskRepository.save(toEntity(request, course, mentor.getId()));
+            Task task = taskRepository.save(toEntity(request, course, TRUE));
+            CourseMentor courseMentor = courseMentorRepository.save(CourseMentorMapper.toEntity(course, currentUser));
+            // TODO: send approval request to expert to create the task
+            return toResponse(task, course, List.of(courseMentor), List.of());
         }
-
-        return toResponse(task);
     }
 
     public TaskResponse updateById(Long id, TaskUpdateRequest request) {
@@ -98,72 +101,64 @@ public class TaskService {
         if (taskRepository.existsByCourse_IdAndTitleAndStatusNot(task.getCourse().getId(), request.title(), TaskStatus.DELETED))
             throw new ApiException(ResponseStatus.TASK_ALREADY_EXISTS);
 
-        // Verify if mentor exists in local DB
-        UserResponse mentor = authClient.getUserByIdInternal(request.mentorId());
-        if (mentor == null)
-            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
+        UserContext currentUser = getCurrentUser();
+        Course course = task.getCourse();
 
-        // Verify if mentor's role in local DB matches with the one in Keycloak
-        if (!mentor.getRole().equals(Role.MENTOR))
-            throw new ApiException(ResponseStatus.ROLE_MISMATCH_EXCEPTION);
+        if (currentUser.getRoles().contains("ROLE_" + Role.SUPERVISOR.name())) {
+            update(request, task);
+            taskRepository.save(task);
+        } else if (currentUser.getRoles().contains("ROLE_" + Role.EXPERT.name())) {
+            // Check if expert is assigned to the program
+            if (!programExpertRepository.existsByProgramAndExpertIdAndStatus(course.getProgram(), currentUser.getId(), SpecialistProgramStatus.ASSIGNED))
+                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
 
-        update(request, task);
+            update(request, task);
+            taskRepository.save(task);
+        } else {
+            // Check if mentor is assigned to the course
+            if (!courseMentorRepository.existsByCourseAndMentorIdAndStatus(course, currentUser.getId(), SpecialistProgramStatus.ASSIGNED))
+                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
 
-        return toResponse(taskRepository.save(task));
-    }
-
-    public TaskResponse updateTitle(Long id, TaskUpdateTitleRequest request) {
-        Task task = taskRepository.findByIdAndStatusNot(id, TaskStatus.DELETED)
-            .orElseThrow(() -> new ApiException(ResponseStatus.TASK_NOT_FOUND));
-
-        if (taskRepository.existsByCourse_IdAndTitleAndStatusNot(task.getCourse().getId(), request.title(), TaskStatus.DELETED))
-            throw new ApiException(ResponseStatus.TASK_ALREADY_EXISTS);
-
-        Optional<String> currentUserId = userContextService.getCurrentUserId();
-        if (currentUserId.isEmpty()) {
-            log.error("User details are not present in the context for mentor in TaskService.updateTitle()");
-            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
+            // TODO: send approval request to expert to update the task
         }
 
-        // Verify if mentor exists in local DB
-        UserResponse mentor = authClient.getUserByIdInternal(UUID.fromString(currentUserId.get()));
-        if (mentor == null)
-            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
+        List<CourseMentor> mentors = courseMentorRepository.findAllByCourseId(course.getId());
+        List<TaskIntern> interns = taskInternRepository.findAllByTaskId(task.getId());
 
-        if (!Objects.equals(task.getMentorId(), mentor.getId()))
-            throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
-
-        update(request, task);
-
-        return toResponse(taskRepository.save(task));
+        return toResponse(task, course, mentors, interns);
     }
 
     public void deleteById(Long id) {
         Task task = taskRepository.findByIdAndStatusNot(id, TaskStatus.DELETED)
             .orElseThrow(() -> new ApiException(ResponseStatus.TASK_NOT_FOUND));
 
-        Optional<String> currentUserId = userContextService.getCurrentUserId();
-        if (currentUserId.isEmpty()) {
-            log.error("User details are not present in the context in TaskService.deleteById()");
-            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
-        }
+        UserContext currentUser = getCurrentUser();
+        Course course = task.getCourse();
 
-        UserResponse currentUser = authClient.getUserByIdInternal(UUID.fromString(currentUserId.get()));
-        if (currentUser == null)
-            throw new ApiException(ResponseStatus.USER_NOT_FOUND);
+        if (currentUser.getRoles().contains("ROLE_" + Role.EXPERT.name())) {
+            // Check if expert is assigned to the program
+            if (!programExpertRepository.existsByProgramAndExpertIdAndStatus(course.getProgram(), currentUser.getId(), SpecialistProgramStatus.ASSIGNED))
+                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
+        } else if (currentUser.getRoles().contains("ROLE_" + Role.MENTOR.name())) {
+            // Check if mentor is assigned to the course
+            if (!courseMentorRepository.existsByCourseAndMentorIdAndStatus(course, currentUser.getId(), SpecialistProgramStatus.ASSIGNED))
+                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
 
-        if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.SUPERVISOR.name())) {
-            if (!task.getCourse().getProgram().getExpertId().equals(currentUser.getId()))
-                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
-        } else if (userContextService.getCurrentUserRoles().contains("ROLE_" + Role.EXPERT.name())) {
-            if (!task.getCourse().getExpertId().equals(currentUser.getId()))
-                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
-        } else {
-            if (!task.getMentorId().equals(currentUser.getId()))
-                throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
+            // TODO: send approval request to expert to delete the task
+            return;
         }
 
         task.softDelete(currentUser.getId());
         taskRepository.save(task);
+    }
+
+    private UserContext getCurrentUser() {
+        Optional<UserContext> currentUserContext = userContextService.getCurrentUserContext();
+        if (currentUserContext.isEmpty()) {
+            log.error("User details are not present in the context in TaskService.getCurrentUser()");
+            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
+        }
+
+        return currentUserContext.get();
     }
 }

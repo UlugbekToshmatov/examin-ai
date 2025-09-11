@@ -1,6 +1,7 @@
 package ai.examin.admin.model.task.repository;
 
 import ai.examin.admin.model.task.entity.Task;
+import ai.examin.core.enums.TaskInternStatus;
 import ai.examin.core.enums.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,5 +14,5 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Boolean existsByCourse_IdAndTitleAndStatusNot(Long course_id, String title, TaskStatus status);
     Optional<Task> findByIdAndStatusNot(Long id, TaskStatus status);
     List<Task> findAllByStatusNot(TaskStatus status);
-    List<Task> findAllByCourse_IdAndStatusNot(Long courseId, TaskStatus taskStatus);
+    List<Task> findAllByCourse_IdAndStatusNot(Long courseId, TaskStatus taskInternStatus);
 }

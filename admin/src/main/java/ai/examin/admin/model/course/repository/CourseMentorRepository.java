@@ -1,5 +1,6 @@
 package ai.examin.admin.model.course.repository;
 
+import ai.examin.admin.model.course.entity.Course;
 import ai.examin.admin.model.course.entity.CourseMentor;
 import ai.examin.core.enums.SpecialistProgramStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,9 +15,11 @@ import java.util.UUID;
 @Repository
 public interface CourseMentorRepository extends JpaRepository<CourseMentor, Long> {
     @Query(value = """
-        SELECT cm FROM CourseMentor cm 
+        SELECT cm FROM CourseMentor cm
         WHERE cm.course.id = :courseId AND cm.status = 'ASSIGNED'
     """)
     List<CourseMentor> findAllByCourseId(@PathVariable("courseId") Long courseId);
-    Optional<CourseMentor> findByCourse_IdAndMentorIdAndStatus(Long course_id, UUID mentorId, SpecialistProgramStatus status);
+
+    Optional<CourseMentor> findByCourse_IdAndMentorId(Long course_id, UUID mentorId);
+    Boolean existsByCourseAndMentorIdAndStatus(Course course, UUID mentorId, SpecialistProgramStatus status);
 }

@@ -30,9 +30,6 @@ public class Program extends BaseEntity {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "expert_id", nullable = false)
-    private UUID expertId;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'ACTIVE'")
     private ProgramStatus status = ProgramStatus.ACTIVE;

@@ -33,9 +33,7 @@ public class Course extends BaseEntity {
     @JoinColumn(name = "program_id", nullable = false)
     private Program program;
 
-    @Column(name = "expert_id", nullable = false)
-    private UUID expertId;  // TODO: mentorId
-
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'PENDING_APPROVAL'")
     private CourseStatus status = CourseStatus.PENDING_APPROVAL;
 

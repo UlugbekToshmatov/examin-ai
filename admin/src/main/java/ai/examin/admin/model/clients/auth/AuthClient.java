@@ -1,11 +1,13 @@
 package ai.examin.admin.model.clients.auth;
 
-import ai.examin.admin.model.clients.auth.dto.UserResponse;
+import ai.examin.admin.model.clients.auth.dto.AccountCreationRequest;
+import ai.examin.admin.model.profile.dto.UserUpdateRequest;
+import ai.examin.core.base_classes.HttpResponse;
 import ai.examin.core.config.FeignClientConfig;
-import ai.examin.core.security.UserPrincipal;
+import ai.examin.core.enums.Role;
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -15,15 +17,20 @@ import java.util.UUID;
     fallbackFactory = AuthClientFallbackFactory.class
 )
 public interface AuthClient {
-    @GetMapping("/api/v1/user/internal/email/{email}")
-    UserPrincipal getUserByEmail(@PathVariable String email);
 
-    @GetMapping("/api/v1/user/internal/id/{id}")
-    UserResponse getUserById(@PathVariable Long id);
+    @GetMapping("/api/v1/user")
+    HttpResponse getUserById(@RequestParam("id") UUID id);
 
-    @GetMapping("/api/v1/user/internal/id/{id}")
-    UserResponse getUserByIdInternal(@PathVariable UUID id);
+    @PostMapping("/api/v1/user/create")
+    HttpResponse createAccount(@RequestBody @Valid AccountCreationRequest request);
 
-    @GetMapping("/api/v1/user/internal/external-id/{external-id}")
-    UserResponse getUserByExternalId(@PathVariable("external-id") String externalId);
+    @PutMapping("/api/v1/user")
+    HttpResponse updateAccount(@RequestParam("id") UUID id, @RequestBody @Valid UserUpdateRequest request);
+
+    @PutMapping("/api/v1/user/role")
+    HttpResponse updateRole(@RequestParam("id") UUID id, @RequestParam Role role);
+
+    @DeleteMapping("/api/v1/user")
+    HttpResponse deleteAccount(@RequestParam("id") UUID id);
+
 }

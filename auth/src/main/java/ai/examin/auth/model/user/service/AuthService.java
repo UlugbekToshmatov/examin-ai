@@ -107,13 +107,7 @@ public class AuthService {
         if (request.getOldPassword().equals(request.getNewPassword()))
             throw new ApiException(ResponseStatus.PROVIDE_NEW_PASSWORD);
 
-        Optional<String> currentUserId = userContextService.getCurrentUserId();
-        if (currentUserId.isEmpty()) {
-            log.error("User details are not present in the context for user with id: {}", user.getId());
-            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
-        }
-
-        if (!Objects.equals(user.getId().toString(), currentUserId.get()))
+        if (!Objects.equals(user.getId(), getCurrentUserId()))
             throw new ApiException(ResponseStatus.METHOD_NOT_ALLOWED);
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -122,21 +116,12 @@ public class AuthService {
         keycloakService.resetPassword(user.getId().toString(), request.getNewPassword());
     }
 
-    @Transactional
     public void deleteById(UUID id) {
         User user = userRepository.findByIdAndStatus(id, Status.ACTIVE)
             .orElseThrow(() -> new ApiException(ResponseStatus.USER_NOT_FOUND));
 
-        Optional<String> currentUserId = userContextService.getCurrentUserId();
-        if (currentUserId.isEmpty()) {
-            log.error("User details are not present in the context for user with id: {}", id);
-            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
-        }
-
-        user.softDelete(UUID.fromString(currentUserId.get()));
+        user.softDelete(getCurrentUserId());
         userRepository.save(user);
-
-        keycloakService.deleteUser(user.getId().toString());
     }
 
     private void syncUserFromKeycloak(String userId) {
@@ -159,5 +144,15 @@ public class AuthService {
         } catch (Exception e) {
             log.error("Failed to save user with email='{}'. Cause: {}", userRepresentation.getEmail(), e.getMessage());
         }
+    }
+
+    private UUID getCurrentUserId() {
+        Optional<String> currentUserId = userContextService.getCurrentUserId();
+        if (currentUserId.isEmpty()) {
+            log.error("User details are not present in the context in AuthService.getCurrentUserId()");
+            throw new ApiException(ResponseStatus.REQUEST_PARAMETER_NOT_FOUND);
+        }
+
+        return UUID.fromString(currentUserId.get());
     }
 }

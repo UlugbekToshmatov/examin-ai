@@ -48,7 +48,9 @@ public enum ResponseStatus {
     TASK_NOT_FOUND(306, HttpStatus.NOT_FOUND, "Task not found"),
     MENTOR_ID_REQUIRED(307, HttpStatus.BAD_REQUEST, "Mentor ID is required"),
     ALPHA_NUMERIC_VALUE_REQUIRED(308, HttpStatus.BAD_REQUEST, "Name or title must contain only letters and numbers"),
-    SPECIALIST_NOT_FOUND(309, HttpStatus.NOT_FOUND, "Specialist not found");
+    SPECIALIST_NOT_FOUND(309, HttpStatus.NOT_FOUND, "Specialist not found"),
+    SPECIALIST_ALREADY_ASSIGNED(310, HttpStatus.BAD_REQUEST, "Specialist already assigned"),
+    SPECIALIST_ALREADY_UNASSIGNED(311, HttpStatus.BAD_REQUEST, "Specialist already unassigned");
 
 
     private final Integer statusCode;

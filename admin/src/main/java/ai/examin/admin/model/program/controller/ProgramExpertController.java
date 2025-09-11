@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/program-expert")
+@RequestMapping("/api/v1/admin/program-expert")
 @RequiredArgsConstructor
 public class ProgramExpertController {
     private final ProgramExpertService programExpertService;

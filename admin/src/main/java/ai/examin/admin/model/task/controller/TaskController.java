@@ -1,6 +1,9 @@
 package ai.examin.admin.model.task.controller;
 
-import ai.examin.admin.model.task.dto.*;
+import ai.examin.admin.model.task.dto.TaskRequest;
+import ai.examin.admin.model.task.dto.TaskResponse;
+import ai.examin.admin.model.task.dto.TaskResponseMin;
+import ai.examin.admin.model.task.dto.TaskUpdateRequest;
 import ai.examin.admin.model.task.service.TaskService;
 import ai.examin.core.base_classes.HttpResponse;
 import ai.examin.core.enums.ResponseStatus;
@@ -8,14 +11,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/task")
+@RequestMapping("/api/v1/admin/task")
 @RequiredArgsConstructor
 public class TaskController {
     private final TaskService taskService;
@@ -73,25 +75,9 @@ public class TaskController {
         );
     }
 
-    @PreAuthorize(value = "hasAnyRole('SUPERVISOR', 'EXPERT')")
     @PutMapping("/{id}")
     public ResponseEntity<HttpResponse> update(@PathVariable Long id, @RequestBody @Valid TaskUpdateRequest request) {
         TaskResponse taskResponse = taskService.updateById(id, request);
-
-        return ResponseEntity.ok(
-            HttpResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .description(HttpStatus.OK.name())
-                .data(Map.of("taskResponse", taskResponse))
-                .build()
-        );
-    }
-
-    @PutMapping("/title/{id}")
-    public ResponseEntity<HttpResponse> updateTitle(
-        @PathVariable Long id, @RequestBody @Valid TaskUpdateTitleRequest request
-    ) {
-        TaskResponse taskResponse = taskService.updateTitle(id, request);
 
         return ResponseEntity.ok(
             HttpResponse.builder()

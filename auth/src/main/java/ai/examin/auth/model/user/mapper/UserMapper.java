@@ -1,8 +1,6 @@
 package ai.examin.auth.model.user.mapper;
 
-import ai.examin.auth.model.user.dto.UpdatePasswordRequest;
-import ai.examin.auth.model.user.dto.UserRequest;
-import ai.examin.auth.model.user.dto.UserResponse;
+import ai.examin.auth.model.user.dto.*;
 import ai.examin.auth.model.user.entity.User;
 import ai.examin.core.enums.Status;
 import ai.examin.core.enums.Role;
@@ -30,6 +28,17 @@ public class UserMapper {
         return user;
     }
 
+    public static User toEntity(AccountCreationRequest request, PasswordEncoder passwordEncoder, String id) {
+        User user = new User();
+        BeanUtils.copyProperties(request, user, "tempPassword");
+        user.setId(UUID.fromString(id));
+        user.setPassword(passwordEncoder.encode(request.getTempPassword()));
+        user.setRole(request.getRole());
+        user.setStatus(Status.ACTIVE);
+
+        return user;
+    }
+
     public static User toEntity(UserRepresentation userRepresentation) {
         User newUser = new User();
         newUser.setId(UUID.fromString(userRepresentation.getId()));
@@ -38,13 +47,17 @@ public class UserMapper {
         newUser.setLastName(userRepresentation.getLastName());
         newUser.setEmail(userRepresentation.getEmail());
         newUser.setPassword("User registered through social login");
-        if (userRepresentation.isEmailVerified())
-            newUser.setStatus(Status.ACTIVE);
-        else
-            newUser.setStatus(Status.PENDING_VERIFICATION);
+        newUser.setStatus(userRepresentation.isEmailVerified() ? Status.ACTIVE : Status.PENDING_VERIFICATION);
         newUser.setRole(Role.INTERN);
 
         return newUser;
+    }
+
+    public static void update(User user, UserUpdateRequest userRequest) {
+        if (!user.getEmail().equals(userRequest.getEmail()))
+            user.setStatus(Status.PENDING_VERIFICATION);
+
+        BeanUtils.copyProperties(userRequest, user);
     }
 
     public static UserResponse toResponse(User user) {
@@ -52,13 +65,6 @@ public class UserMapper {
         BeanUtils.copyProperties(user, userResponse);
 
         return userResponse;
-    }
-
-    public static UserPayload getUserPayload(User user) {
-        UserPayload userPayload = new UserPayload();
-        BeanUtils.copyProperties(user, userPayload);
-
-        return userPayload;
     }
 
     public static UserPayload getUserPayload(User user, String jwtToken) {
@@ -75,6 +81,20 @@ public class UserMapper {
         request.setLastName(request.getLastName().trim());
         request.setEmail(request.getEmail().trim().toLowerCase());
         request.setPassword(request.getPassword().trim());
+    }
+
+    public static void trimRequest(AccountCreationRequest request) {
+        request.setUsername(request.getUsername().trim().toLowerCase());
+        request.setFirstName(request.getFirstName().trim());
+        request.setLastName(request.getLastName().trim());
+        request.setEmail(request.getEmail().trim().toLowerCase());
+    }
+
+    public static void trimRequest(UserUpdateRequest request) {
+        request.setUsername(request.getUsername().trim().toLowerCase());
+        request.setFirstName(request.getFirstName().trim());
+        request.setLastName(request.getLastName().trim());
+        request.setEmail(request.getEmail().trim().toLowerCase());
     }
 
     public static void trimPasswords(UpdatePasswordRequest request) {

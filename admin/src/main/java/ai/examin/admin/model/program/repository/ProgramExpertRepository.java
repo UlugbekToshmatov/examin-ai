@@ -15,11 +15,11 @@ import java.util.UUID;
 @Repository
 public interface ProgramExpertRepository extends JpaRepository<ProgramExpert, Long> {
     @Query(value = """
-        SELECT pe FROM ProgramExpert pe 
+        SELECT pe FROM ProgramExpert pe
         WHERE pe.program.id = :programId AND pe.status = 'ASSIGNED'
     """)
     List<ProgramExpert> findAllByProgramId(@PathVariable("programId") Long programId);
 
-    Optional<ProgramExpert> findByProgram_IdAndExpertIdAndStatus(Long program_id, UUID expertId, SpecialistProgramStatus status);
+    Optional<ProgramExpert> findByProgram_IdAndExpertId(Long program_id, UUID expertId);
     Boolean existsByProgramAndExpertIdAndStatus(Program program, UUID expertId, SpecialistProgramStatus status);
 }

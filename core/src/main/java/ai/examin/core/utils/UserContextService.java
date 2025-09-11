@@ -7,10 +7,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserContextService {
@@ -35,7 +32,7 @@ public class UserContextService {
 
     public Optional<UserContext> getCurrentUserContext() {
         return getCurrentJwt().map(jwt -> UserContext.builder()
-            .externalId(jwt.getClaimAsString("sub"))
+            .id(UUID.fromString(jwt.getClaimAsString("sub")))
             .username(jwt.getClaimAsString("preferred_username"))
             .email(jwt.getClaimAsString("email"))
             .firstName(jwt.getClaimAsString("given_name"))

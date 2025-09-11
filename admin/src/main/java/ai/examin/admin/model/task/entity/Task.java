@@ -27,9 +27,6 @@ public class Task extends BaseEntity {
     @JoinColumn(name = "course_id", nullable = false, updatable = false)
     private Course course;
 
-    @Column(name = "mentor_id", nullable = false)
-    private UUID mentorId;  // TODO: remove mentorId
-
     @Column(name = "title", nullable = false)
     private String title;
 
@@ -37,8 +34,8 @@ public class Task extends BaseEntity {
     private String definition;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'IN_PROGRESS'")
-    private TaskStatus status = TaskStatus.IN_PROGRESS;
+    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'PENDING_APPROVAL'")
+    private TaskStatus status = TaskStatus.PENDING_APPROVAL;
 
 
     @Override
